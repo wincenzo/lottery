@@ -30,6 +30,9 @@ class Lottery:
 
     @staticmethod
     def choice(_len, max):
+        if not (_len and max):
+            return None
+
         numbers = list(range(1, max+1))
 
         def extraction():
@@ -43,6 +46,9 @@ class Lottery:
 
     @staticmethod
     def sample(_len, max):
+        if not (_len and max):
+            return None
+
         numbers = tuple(range(1, max+1))
         combo = rnd.sample(numbers, k=_len)
 
@@ -50,6 +56,9 @@ class Lottery:
 
     @staticmethod
     def randint(_len, max):
+        if not (_len and max):
+            return None
+
         # create an iterator that calls draw() until it returns 0, but
         # since it is impossible to get 0 from draw(), it works as an
         # infinite generator
@@ -79,7 +88,7 @@ class Lottery:
 
     def extract(self):
         combo = self._backend(self.len_numbers, self.max_numbers)
-        extra = self._backend(self.len_extra, self.max_extra) or None
+        extra = self._backend(self.len_extra, self.max_extra)  # or None
 
         return combo, extra
 
