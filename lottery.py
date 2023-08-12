@@ -1,5 +1,6 @@
 from datetime import datetime
 from random import SystemRandom
+from itertools import repeat
 
 rnd = SystemRandom()
 
@@ -17,7 +18,7 @@ class Lottery:
         self.len_extra = len_extra
 
     @property
-    def combo(self): return self._combo
+    def numbers(self): return self._numbers
 
     @property
     def extra(self): return self._extra
@@ -31,66 +32,69 @@ class Lottery:
     @staticmethod
     def choice(_len, max):
         if not (_len and max):
-            return None
+            ...
 
-        numbers = list(range(1, max+1))
+        else:
+            numbers = list(range(1, max+1))
 
-        def extraction():
-            sample = rnd.choice(numbers)
-            numbers.remove(sample)
-            return sample
+            def extraction():
+                sample = rnd.choice(numbers)
+                numbers.remove(sample)
+                return sample
 
-        combo = (extraction() for _ in range(_len))
+            combo = (extraction() for _ in range(_len))
 
-        return frozenset(combo)
+            return frozenset(combo)
 
     @staticmethod
     def sample(_len, max):
         if not (_len and max):
-            return None
+            ...
 
-        numbers = tuple(range(1, max+1))
-        combo = rnd.sample(numbers, k=_len)
+        else:
+            numbers = tuple(range(1, max+1))
+            combo = rnd.sample(numbers, k=_len)
 
-        return frozenset(combo)
+            return frozenset(combo)
 
     @staticmethod
     def randint(_len, max):
         if not (_len and max):
-            return None
+            ...
 
-        # create an iterator that calls draw() until it returns 0, but
-        # since it is impossible to get 0 from draw(), it works as an
-        # infinite generator
-        def draw(): return rnd.randint(1, max)
-        numbers = iter(draw, 0)
+        else:
+            # create an iterator that calls draw() until it returns 0, but
+            # since it is impossible to get 0 from draw(), it works as an
+            # infinite generator
+            def draw(): return rnd.randint(1, max)
+            numbers = iter(draw, 0)
 
-        combo = set()
-        while len(combo) < _len:
-            combo.add(next(numbers))
+            combo = set()
+            while len(combo) < _len:
+                combo.add(next(numbers))
 
-        return frozenset(combo)
+            return frozenset(combo)
 
     def manySamples(self):
         '''
         To add further randomness, this method simulates several extractions, 
-        among 1 and <size> times, and picks one casually ... hopefully 
-        the winning one :D
+        among 1 and <many> times, and picks one casually ... hopefully the 
+        winning one :D
         '''
-
+        sample = None, None
         size = self._many or 1
         self._stop = rnd.randint(1, size)
 
-        for _ in range(self._stop):
+        for _ in repeat(None, self._stop):
             sample = self.extract()
 
-        return sample  # type: ignore
+        return sample 
 
     def extract(self):
-        combo = self._backend(self.len_numbers, self.max_numbers)
+        numbers = self._backend(self.len_numbers, self.max_numbers)
         extra = self._backend(self.len_extra, self.max_extra)  # or None
 
-        return combo, extra
+        return numbers, extra
 
     def __call__(self, backend='choice', many=None):
         self._many = many
@@ -100,7 +104,7 @@ class Lottery:
                               'randint': self.randint,
                               'sample': self.sample})
 
-        self._combo, self._extra = self.manySamples()
+        self._numbers, self._extra = self.manySamples()
 
         return self
 
@@ -109,7 +113,7 @@ class Lottery:
         now = datetime.now().strftime("%d/%m/%Y %H:%M")
 
         print('Estrazione del:', now, '\nNumeri Estratti:',
-              *sorted(self._combo))  # type: ignore
+              *sorted(self._numbers)) # type: ignore
 
-        if self._extra is not None:
-            print('Superstar:', *sorted(self._extra))  # type: ignore
+        if self.extra is not None:
+            print('Superstar:', *sorted(self._extra)) #type: ignore
