@@ -1,6 +1,7 @@
 from datetime import datetime
 from random import SystemRandom
 from itertools import repeat
+from collections import namedtuple
 
 rnd = SystemRandom()
 
@@ -18,10 +19,10 @@ class Lottery:
         self.len_extra = len_extra
 
     @property
-    def numbers(self): return self._numbers
+    def numbers(self): return self.extraction.numbers #self._numbers
 
     @property
-    def extra(self): return self._extra
+    def extra(self): return self.extraction.extra #self._extra
 
     @property
     def backend(self): return self._backend.__name__
@@ -75,6 +76,12 @@ class Lottery:
 
             return frozenset(combo)
 
+    def extract(self):
+        numbers = self._backend(self.len_numbers, self.max_numbers)
+        extra = self._backend(self.len_extra, self.max_extra)  # or None
+
+        return numbers, extra
+
     def manySamples(self):
         '''
         To add further randomness, this method simulates several extractions, 
@@ -88,13 +95,7 @@ class Lottery:
         for _ in repeat(None, self._stop):
             sample = self.extract()
 
-        return sample 
-
-    def extract(self):
-        numbers = self._backend(self.len_numbers, self.max_numbers)
-        extra = self._backend(self.len_extra, self.max_extra)  # or None
-
-        return numbers, extra
+        return sample
 
     def __call__(self, backend='choice', many=None):
         self._many = many
@@ -103,8 +104,9 @@ class Lottery:
                              {'choice': self.choice,
                               'randint': self.randint,
                               'sample': self.sample})
-
-        self._numbers, self._extra = self.manySamples()
+        
+        Extraction = namedtuple('Extraction', ['numbers', 'extra'])
+        self.extraction = Extraction(*self.manySamples())
 
         return self
 
@@ -113,7 +115,7 @@ class Lottery:
         now = datetime.now().strftime("%d/%m/%Y %H:%M")
 
         print('Estrazione del:', now, '\nNumeri Estratti:',
-              *sorted(self._numbers)) # type: ignore
+              *sorted(self.extraction.numbers))
 
         if self.extra is not None:
-            print('Superstar:', *sorted(self._extra)) #type: ignore
+            print('Superstar:', *self.extraction.extra)  
