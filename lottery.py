@@ -19,10 +19,10 @@ class Lottery:
         self.len_extra = len_extra
 
     @property
-    def numbers(self): return self.extraction.numbers #self._numbers
+    def numbers(self): return self.extraction.numbers 
 
     @property
-    def extra(self): return self.extraction.extra #self._extra
+    def extra(self): return self.extraction.extra 
 
     @property
     def backend(self): return self._backend.__name__
