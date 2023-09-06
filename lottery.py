@@ -123,4 +123,4 @@ class Lottery:
               *sorted(self.extraction.numbers))
 
         if self.extra is not None:
-            print('Superstar:', *self.extraction.extra)
+            print('Superstar:', *sorted(self.extraction.extra))
