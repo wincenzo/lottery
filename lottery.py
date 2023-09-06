@@ -10,8 +10,8 @@ class Lottery:
 
     def __init__(self,
                  max_numbers=90,
-                 max_extra=90,
                  len_numbers=6,
+                 max_extra=90,
                  len_extra=1):
         self.max_numbers = max_numbers
         self.max_extra = max_extra
@@ -120,7 +120,7 @@ class Lottery:
         now = datetime.now().strftime("%d/%m/%Y %H:%M")
 
         print('Estrazione del:', now, '\nNumeri Estratti:',
-              *sorted(self.extraction.numbers))
+              *sorted(self.numbers))
 
         if self.extra is not None:
-            print('Superstar:', *sorted(self.extraction.extra))
+            print('Superstar:', *sorted(self.extra))
