@@ -19,10 +19,10 @@ class Lottery:
         self.len_extra = len_extra
 
     @property
-    def numbers(self): return self.extraction.numbers 
+    def numbers(self): return self.extraction.numbers
 
     @property
-    def extra(self): return self.extraction.extra 
+    def extra(self): return self.extraction.extra
 
     @property
     def backend(self): return self._backend.__name__
@@ -99,12 +99,17 @@ class Lottery:
 
     def __call__(self, backend='choice', many=None):
         self._many = many
-        self._backend = eval(backend,
-                             {'__builtins__': {}},
-                             {'choice': self.choice,
-                              'randint': self.randint,
-                              'sample': self.sample})
-        
+
+        match backend:
+            case 'choice':
+                self._backend = self.choice
+            case 'randint':
+                self._backend = self.randint
+            case 'sample':
+                self._backend = self.sample
+            case _:
+                raise Exception('not a valid backend')
+
         Extraction = namedtuple('Extraction', ['numbers', 'extra'])
         self.extraction = Extraction(*self.manySamples())
 
@@ -118,4 +123,4 @@ class Lottery:
               *sorted(self.extraction.numbers))
 
         if self.extra is not None:
-            print('Superstar:', *self.extraction.extra)  
+            print('Superstar:', *self.extraction.extra)
