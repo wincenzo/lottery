@@ -43,9 +43,7 @@ class Lottery:
                 numbers.remove(sample)
                 return sample
 
-            combo = (extraction() for _ in range(_len))
-
-            return frozenset(combo)
+            return frozenset(extraction() for _ in range(_len))
 
     @staticmethod
     def sample(_len, max):
@@ -54,9 +52,8 @@ class Lottery:
 
         else:
             numbers = tuple(range(1, max+1))
-            combo = rnd.sample(numbers, k=_len)
 
-            return frozenset(combo)
+            return frozenset(rnd.sample(numbers, k=_len))
 
     @staticmethod
     def randint(_len, max):
