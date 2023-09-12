@@ -50,46 +50,43 @@ class Lottery:
     @staticmethod
     def choice(_len, _max):
         if not (_len and _max):
-            ...
+            return None
         
-        else:
-            numbers = list(range(1, _max+1))
+        numbers = list(range(1, _max+1))
 
-            def extraction():
-                sample = rnd.choice(numbers)
-                numbers.remove(sample)
-                return sample
-
-            return frozenset(extraction() for _ in range(_len))
+        def extraction():
+            sample = rnd.choice(numbers)
+            numbers.remove(sample)
+            return sample
+        
+        return frozenset(extraction() for _ in range(_len))
 
     @staticmethod
     def sample(_len, _max):
         if not (_len and _max):
-            ...
+            return None
 
-        else:
-            numbers = tuple(range(1, _max+1))
+        numbers = tuple(range(1, _max+1))
 
-            return frozenset(rnd.sample(numbers, k=_len))
+        return frozenset(rnd.sample(numbers, k=_len))
 
     @staticmethod
     def randint(_len, _max):
         if not (_len and _max):
-            ...
+            return None
 
-        else:
-            # create an iterator that calls draw() until it returns 0, but
-            # since it is impossible to get 0 from draw(), it works as an
-            # infinite generator
-            def draw(): 
-                return rnd.randint(1, _max)
-            numbers = iter(draw, 0)
+        # create an iterator that calls draw() until it returns 0, but
+        # since it is impossible to get 0 from draw(), it works as an
+        # infinite generator
+        def draw():
+            return rnd.randint(1, _max)
+        numbers = iter(draw, 0)
 
-            combo = set()
-            while len(combo) < _len:
-                combo.add(next(numbers))
+        combo = set()
+        while len(combo) < _len:
+            combo.add(next(numbers))
 
-            return frozenset(combo)
+        return frozenset(combo)
 
     def extract(self):
         numbers = self._backend(self.len_numbers, self.max_numbers)
@@ -97,7 +94,7 @@ class Lottery:
 
         return numbers, extra
 
-    def manySamples(self):
+    def many_samples(self):
         '''
         To add further randomness, this method simulates several extractions, 
         among 1 and <many> times, and picks one casually ... hopefully the 
@@ -117,7 +114,7 @@ class Lottery:
         self.backend = backend
         
         Extraction = namedtuple('Extraction', ['numbers', 'extra'])
-        self._extraction = Extraction(*self.manySamples())
+        self._extraction = Extraction(*self.many_samples())
 
         return self
 
