@@ -52,7 +52,7 @@ class Lottery:
         if not (_len and _max):
             return None
 
-        numbers = list(range(1, _max+1))
+        numbers = list(range(1, _max + 1))
 
         def extraction():
             sample = rnd.choice(numbers)
@@ -66,7 +66,7 @@ class Lottery:
         if not (_len and _max):
             return None
 
-        numbers = tuple(range(1, _max+1))
+        numbers = tuple(range(1, _max + 1))
 
         return frozenset(rnd.sample(numbers, k=_len))
 
