@@ -1,7 +1,7 @@
-from datetime import datetime
-from random import SystemRandom
-from itertools import repeat
 from collections import namedtuple
+from datetime import datetime
+from itertools import repeat
+from random import SystemRandom
 
 rnd = SystemRandom()
 
@@ -18,7 +18,7 @@ class Lottery:
         self.len_extra = len_extra
         self._stop = 0
         self._many = 1
-    
+
     @property
     def backend(self):
         return self._backend
@@ -34,15 +34,15 @@ class Lottery:
                 self._backend = self.sample
             case _:
                 raise ValueError('not a valid backend')
- 
+
     @backend.getter
     def backend(self):
         return self._backend.__name__
-   
+
     @property
     def extraction(self):
         return self._extraction
-    
+
     @extraction.setter
     def extraction(self, combos):
         self._extraction = combos
@@ -51,14 +51,14 @@ class Lottery:
     def choice(_len, _max):
         if not (_len and _max):
             return None
-        
+
         numbers = list(range(1, _max+1))
 
         def extraction():
             sample = rnd.choice(numbers)
             numbers.remove(sample)
             return sample
-        
+
         return frozenset(extraction() for _ in range(_len))
 
     @staticmethod
@@ -78,7 +78,7 @@ class Lottery:
         # create an iterator that calls random.randint until it returns
         # None, but since it is impossible to get None from it, it works
         # as an infinite generator
-        numbers = iter(lambda: rnd.randint(1, _max) , None)
+        numbers = iter(lambda: rnd.randint(1, _max), None)
 
         combo = set()
         while len(combo) < _len:
@@ -95,7 +95,7 @@ class Lottery:
     def many_samples(self):
         '''
         To add further randomness, this method simulates several extractions
-        among 1 and <many> times, and picks one casually ... hopefully the 
+        among 1 and <many> times, and picks one casually ... hopefully the
         winning one :D
         '''
         sample = frozenset(), frozenset()
@@ -110,7 +110,7 @@ class Lottery:
     def __call__(self, backend='choice', many=None):
         self._many = many
         self.backend = backend
-        
+
         Extraction = namedtuple('Extraction', ['numbers', 'extra'])
         self._extraction = Extraction(*self.many_samples())
 
