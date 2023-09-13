@@ -112,7 +112,7 @@ class Lottery:
         self.backend = backend
 
         Extraction = namedtuple('Extraction', ['numbers', 'extra'])
-        self._extraction = Extraction(*self.many_samples())
+        self.extraction = Extraction(*self.many_samples())
 
         return self
 
