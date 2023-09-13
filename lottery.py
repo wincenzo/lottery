@@ -17,7 +17,7 @@ class Lottery:
         self.len_numbers = len_numbers
         self.len_extra = len_extra
         self._stop = 0
-        self._many = 0
+        self._many = 1
     
     @property
     def backend(self):
@@ -75,12 +75,10 @@ class Lottery:
         if not (_len and _max):
             return None
 
-        # create an iterator that calls draw() until it returns 0, but
-        # since it is impossible to get 0 from draw(), it works as an
-        # infinite generator
-        def draw():
-            return rnd.randint(1, _max)
-        numbers = iter(draw, 0)
+        # create an iterator that calls random.randint until it returns
+        # None, but since it is impossible to get None from it, it works
+        # as an infinite generator
+        numbers = iter(lambda: rnd.randint(1, _max) , None)
 
         combo = set()
         while len(combo) < _len:
@@ -96,7 +94,7 @@ class Lottery:
 
     def many_samples(self):
         '''
-        To add further randomness, this method simulates several extractions, 
+        To add further randomness, this method simulates several extractions
         among 1 and <many> times, and picks one casually ... hopefully the 
         winning one :D
         '''
