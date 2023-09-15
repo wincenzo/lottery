@@ -16,6 +16,8 @@ class Lottery:
         self.max_extra = max_extra
         self.len_numbers = len_numbers
         self.len_extra = len_extra
+        self.backend = 'sample'
+        self.extraction = None
         self._stop = 0
         self._many = 1
 
@@ -54,12 +56,12 @@ class Lottery:
 
         numbers = list(range(1, _max + 1))
 
-        def extraction():
+        def drawer():
             sample = rnd.choice(numbers)
             numbers.remove(sample)
             return sample
 
-        return frozenset(extraction() for _ in range(_len))
+        return frozenset(drawer() for _ in range(_len))
 
     @staticmethod
     def sample(_len, _max):
@@ -107,7 +109,7 @@ class Lottery:
 
         return sample
 
-    def __call__(self, backend='choice', many=None):
+    def __call__(self, backend='sample', many=None):
         self._many = many
         self.backend = backend
 
