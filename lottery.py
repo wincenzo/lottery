@@ -46,13 +46,13 @@ class Lottery:
         return self._extraction
 
     @extraction.setter
-    def extraction(self, combos):
-        self._extraction = combos
+    def extraction(self, value):
+        self._extraction = value
 
     @staticmethod
     def choice(_len, _max):
         if not (_len and _max):
-            return None
+            return
 
         numbers = list(range(1, _max + 1))
 
@@ -66,7 +66,7 @@ class Lottery:
     @staticmethod
     def sample(_len, _max):
         if not (_len and _max):
-            return None
+            return
 
         numbers = tuple(range(1, _max + 1))
 
@@ -75,7 +75,7 @@ class Lottery:
     @staticmethod
     def randint(_len, _max):
         if not (_len and _max):
-            return None
+            return
 
         # create an iterator that calls random.randint until it returns
         # None, but since it is impossible to get None from it, it works
@@ -83,7 +83,7 @@ class Lottery:
         numbers = iter(lambda: rnd.randint(1, _max), None)
 
         combo = set()
-        while len(combo) < _len:
+        while _len - len(combo):
             combo.add(next(numbers))
 
         return frozenset(combo)
