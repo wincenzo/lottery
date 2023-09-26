@@ -104,8 +104,7 @@ class Lottery:
         '''
         sample = frozenset(), frozenset()
 
-        size = self._many or 1
-        self._stop = rnd.randint(1, size)
+        self._stop = rnd.randint(1, self._many or 1)
 
         for _ in repeat(None, self._stop):
             sample = self.extract()
