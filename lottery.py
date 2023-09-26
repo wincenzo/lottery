@@ -18,7 +18,7 @@ class Lottery:
         self.len_extra = len_extra
         self.backend = 'sample'
         self.extraction = None
-        self._stop = 0
+        self._stop = 1
         self._many = 1
 
     @property
@@ -50,40 +50,40 @@ class Lottery:
         self._extraction = value
 
     @staticmethod
-    def choice(_len, _max):
-        if not (_len and _max):
-            return
+    def choice(len_, max_):
+        if not (len_ and max_):
+            return None
 
-        numbers = list(range(1, _max + 1))
+        numbers = list(range(1, max_ + 1))
 
         def drawer():
             sample = rnd.choice(numbers)
             numbers.remove(sample)
             return sample
 
-        return frozenset(drawer() for _ in range(_len))
+        return frozenset(drawer() for _ in range(len_))
 
     @staticmethod
-    def sample(_len, _max):
-        if not (_len and _max):
-            return
+    def sample(len_, max_):
+        if not (len_ and max_):
+            return None
 
-        numbers = tuple(range(1, _max + 1))
+        numbers = tuple(range(1, max_ + 1))
 
-        return frozenset(rnd.sample(numbers, k=_len))
+        return frozenset(rnd.sample(numbers, k=len_))
 
     @staticmethod
-    def randint(_len, _max):
-        if not (_len and _max):
-            return
+    def randint(len_, max_):
+        if not (len_ and max_):
+            return None
 
         # create an iterator that calls random.randint until it returns
         # None, but since it is impossible to get None from it, it works
         # as an infinite generator
-        numbers = iter(lambda: rnd.randint(1, _max), None)
+        numbers = iter(lambda: rnd.randint(1, max_), None)
 
         combo = set()
-        while _len - len(combo):
+        while len_ - len(combo):
             combo.add(next(numbers))
 
         return frozenset(combo)
@@ -101,6 +101,7 @@ class Lottery:
         winning one :D
         '''
         sample = frozenset(), frozenset()
+
         size = self._many or 1
         self._stop = rnd.randint(1, size)
 
