@@ -18,8 +18,6 @@ class Lottery:
         self.len_extra = len_extra
         self.backend = 'sample'
         self.extraction = None
-        self._stop = 1
-        self._many = 1
 
     @property
     def backend(self):
