@@ -89,16 +89,18 @@ class Lottery:
         return frozenset(combo)
 
     def extract(self):
-        numbers = self._backend(self.len_numbers, self.max_numbers)
-        extra = self._backend(self.len_extra, self.max_extra)
+        numbers = self._backend(
+            self.len_numbers, self.max_numbers)
+        extra = self._backend(
+            self.len_extra, self.max_extra)
 
         return numbers, extra
 
     def many_samples(self):
         '''
-        To add further randomness, this method simulates several extractions
-        among 1 and <many> times, and picks one casually ... hopefully the
-        winning one :D
+        To add further randomness, this method simulates several
+        extractions among 1 and <many> times, and picks one casually
+        ... hopefully the winning one :D
         '''
         sample = frozenset(), frozenset()
 
