@@ -18,6 +18,8 @@ class Lottery:
         self.len_extra = len_extra
         self.backend = 'sample'
         self.extraction = None
+        self._many = None
+        self._stop = 1
 
     @property
     def backend(self):
@@ -97,23 +99,23 @@ class Lottery:
     def many_samples(self):
         '''
         To add further randomness, this method simulates several
-        extractions among 1 and <many> times, and picks one casually
-        ... hopefully the winning one :D
+        extractions among 1 and <many> times, and picks one casually,
+        hopefully the winning one :D
         '''
-        sample = frozenset(), frozenset()
+        numbers, extra = frozenset(), frozenset()
 
         self._stop = rnd.randint(1, self._many or 1)
 
         for _ in repeat(None, self._stop):
-            sample = self.extract()
+            numbers, extra = self.extract()
 
-        return sample
+        return numbers, extra
 
-    def __call__(self, backend='sample', many=None):
+    def __call__(self, backend=None, many=None):
         self._many = many
         self.backend = backend
 
-        Extraction = namedtuple('Extraction', ['numbers', 'extra'])
+        Extraction = namedtuple('Extraction', ('numbers', 'extra'))
         self.extraction = Extraction(*self.many_samples())
 
         return self
