@@ -16,7 +16,7 @@ class Lottery:
         self.max_extra = max_extra
         self.len_numbers = len_numbers
         self.len_extra = len_extra
-        self.backend = None
+        self.backend = 'sample'
         self.extraction = None
         self._many = None
         self._stop = 1
