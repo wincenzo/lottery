@@ -16,7 +16,7 @@ class Lottery:
         self.max_extra = max_extra
         self.len_numbers = len_numbers
         self.len_extra = len_extra
-        self.backend = 'sample'
+        self.backend = None
         self.extraction = None
         self._many = None
         self._stop = 1
@@ -40,14 +40,6 @@ class Lottery:
     @backend.getter
     def backend(self):
         return self._backend.__name__
-
-    @property
-    def extraction(self):
-        return self._extraction
-
-    @extraction.setter
-    def extraction(self, value):
-        self._extraction = value
 
     @staticmethod
     def choice(len_, max_):
@@ -102,10 +94,9 @@ class Lottery:
         extractions among 1 and <many> times, and picks one casually,
         hopefully the winning one :D
         '''
-        numbers, extra = frozenset(), frozenset()
-
         self._stop = rnd.randint(1, self._many or 1)
 
+        numbers, extra = frozenset(), frozenset()
         for _ in repeat(None, self._stop):
             numbers, extra = self.extract()
 
@@ -124,8 +115,9 @@ class Lottery:
     def draw(self):
         now = datetime.now().strftime("%d/%m/%Y %H:%M")
 
-        print('Estrazione del:', now, '\nNumeri Estratti:',
-              *sorted(self.extraction.numbers))
+        if self.extraction is not None:
+            print('Estrazione del:', now, '\nNumeri Estratti:',
+                  *sorted(self.extraction.numbers))
 
-        if self.extraction.extra is not None:
-            print('Superstar:', *sorted(self.extraction.extra))
+            if self.extraction.extra is not None:
+                print('Superstar:', *sorted(self.extraction.extra))
