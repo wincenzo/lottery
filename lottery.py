@@ -52,9 +52,9 @@ class Lottery:
         numbers = list(range(1, max_ + 1))
 
         def drawer():
-            sample = rnd.choice(numbers)
-            numbers.remove(sample)
-            return sample
+            number = rnd.choice(numbers)
+            numbers.remove(number)
+            return number
 
         return frozenset(drawer() for _ in range(len_))
 
@@ -79,7 +79,8 @@ class Lottery:
 
         combo = set()
         while len_ - len(combo):
-            combo.add(next(numbers))
+            number = next(numbers)
+            combo.add(number)
 
         return frozenset(combo)
 
