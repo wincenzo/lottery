@@ -114,7 +114,7 @@ class Lottery:
 
     @property
     def draw(self):
-        now = datetime.now().strftime("%d/%m/%Y %H:%M")
+        now = datetime.now().strftime("%c")
 
         if self.extraction is not None:
             print('Estrazione del:', now, '\nNumeri Estratti:',
