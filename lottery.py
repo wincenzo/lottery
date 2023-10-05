@@ -19,8 +19,7 @@ class Lottery:
         self.backend = 'sample'
         self._many = None
         self._stop = 1
-        self.extraction = self.Extraction(
-            frozenset(), frozenset())
+        self.extraction = self.Extraction(None, None)
 
     Extraction = namedtuple('Extraction', ('numbers', 'extra'))
 
