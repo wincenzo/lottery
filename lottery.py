@@ -17,10 +17,10 @@ class Lottery:
         self.len_numbers = len_numbers
         self.len_extra = len_extra
         self.backend = 'sample'
-        self.extraction = self.Extraction(frozenset(),
-                                          frozenset())
         self._many = None
         self._stop = 1
+        self.extraction = self.Extraction(
+            frozenset(), frozenset())
 
     Extraction = namedtuple('Extraction', ('numbers', 'extra'))
 
@@ -97,7 +97,7 @@ class Lottery:
         '''
         self._stop = rnd.randint(1, self._many or 1)
 
-        numbers, extra = frozenset(), frozenset()
+        numbers, extra = None, None
         for _ in repeat(None, self._stop):
             numbers, extra = self.extract()
 
