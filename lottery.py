@@ -17,9 +17,12 @@ class Lottery:
         self.len_numbers = len_numbers
         self.len_extra = len_extra
         self.backend = 'sample'
-        self.extraction = None
+        self.extraction = self.Extraction(frozenset(),
+                                          frozenset())
         self._many = None
         self._stop = 1
+
+    Extraction = namedtuple('Extraction', ('numbers', 'extra'))
 
     @property
     def backend(self):
@@ -81,10 +84,8 @@ class Lottery:
         return frozenset(combo)
 
     def extract(self):
-        numbers = self._backend(
-            self.len_numbers, self.max_numbers)
-        extra = self._backend(
-            self.len_extra, self.max_extra)
+        numbers = self._backend(self.len_numbers, self.max_numbers)
+        extra = self._backend(self.len_extra, self.max_extra)
 
         return numbers, extra
 
@@ -106,8 +107,7 @@ class Lottery:
         self._many = many
         self.backend = backend
 
-        Extraction = namedtuple('Extraction', ('numbers', 'extra'))
-        self.extraction = Extraction(*self.many_samples())
+        self.extraction = self.Extraction(*self.many_samples())
 
         return self
 
