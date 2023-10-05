@@ -17,11 +17,12 @@ class Lottery:
         self.len_numbers = len_numbers
         self.len_extra = len_extra
         self.backend = 'sample'
+        self.extraction = self.Extraction(None, None)
         self._many = None
         self._stop = 1
-        self.extraction = self.Extraction(None, None)
 
-    Extraction = namedtuple('Extraction', ('numbers', 'extra'))
+    Extraction = namedtuple(
+        'Extraction', ('numbers', 'extra'))
 
     @property
     def backend(self):
