@@ -26,6 +26,7 @@ class Lottery:
 
     @property
     def backend(self):
+
         return self._backend
 
     @backend.setter
