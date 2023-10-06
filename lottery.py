@@ -16,22 +16,23 @@ class Lottery:
         self.max_extra = max_extra
         self.len_numbers = len_numbers
         self.len_extra = len_extra
-        self.backend = 'sample'
+        self.backend = None
         self.extraction = self.Extraction(None, None)
-        self._many = None
-        self._stop = 1
+        self.many = None
+        self._stop = None
 
     Extraction = namedtuple(
         'Extraction', ('numbers', 'extra'))
 
     @property
     def backend(self):
-
         return self._backend
 
     @backend.setter
     def backend(self, value):
         match value:
+            case None:
+                self._backend = self.sample
             case 'choice':
                 self._backend = self.choice
             case 'randint':
@@ -97,7 +98,7 @@ class Lottery:
         extractions among 1 and <many> times, and picks one casually,
         hopefully the winning one :D
         '''
-        self._stop = rnd.randint(1, self._many or 1)
+        self._stop = rnd.randint(1, self.many or 1)
 
         numbers, extra = None, None
         for _ in repeat(None, self._stop):
@@ -106,7 +107,7 @@ class Lottery:
         return numbers, extra
 
     def __call__(self, backend=None, many=None):
-        self._many = many
+        self.many = many
         self.backend = backend
 
         self.extraction = self.Extraction(*self.many_samples())
