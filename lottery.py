@@ -31,13 +31,11 @@ class Lottery:
     @backend.setter
     def backend(self, value):
         match value:
-            case None:
-                self._backend = self.sample
             case 'choice':
                 self._backend = self.choice
             case 'randint':
                 self._backend = self.randint
-            case 'sample':
+            case 'sample' | None:
                 self._backend = self.sample
             case _:
                 raise ValueError('not a valid backend')
