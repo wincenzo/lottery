@@ -71,14 +71,14 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        drawer = iter(lambda: rnd.randint(1, max_), None)
+        draw = iter(lambda: rnd.randint(1, max_), None)
 
-        combo = set()
-        while len_ - len(combo):
-            number = next(drawer)
-            combo.add(number)
+        extraction = set()
+        while len_ - len(extraction):
+            number = next(draw)
+            extraction.add(number)
 
-        return frozenset(combo)
+        return frozenset(extraction)
 
     def extract(self):
         numbers = self._backend(self.len_numbers, self.max_numbers)
