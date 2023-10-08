@@ -50,12 +50,12 @@ class Lottery:
 
         numbers = list(range(1, max_ + 1))
 
-        def drawer():
+        def get_number():
             number = rnd.choice(numbers)
             numbers.remove(number)
             return number
 
-        return frozenset(drawer() for _ in range(len_))
+        return frozenset(get_number() for _ in range(len_))
 
     @staticmethod
     def sample(len_, max_):
@@ -71,11 +71,11 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        numbers = iter(lambda: rnd.randint(1, max_), None)
+        drawer = iter(lambda: rnd.randint(1, max_), None)
 
         combo = set()
         while len_ - len(combo):
-            number = next(numbers)
+            number = next(drawer)
             combo.add(number)
 
         return frozenset(combo)
@@ -95,7 +95,6 @@ class Lottery:
         self._stop = rnd.randint(1, many or 1)
 
         extractions = iter(self.extract, None)
-
         numbers, extra = next(islice(
             extractions, self._stop, self._stop + 1))
 
@@ -103,7 +102,6 @@ class Lottery:
 
     def __call__(self, backend=None, many=None):
         self.backend = backend
-
         self.extraction = self.Extraction(*self.many_samples(many))
 
         return self
