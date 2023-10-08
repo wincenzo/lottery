@@ -1,6 +1,6 @@
 from collections import namedtuple
 from datetime import datetime
-from itertools import islice  # , repeat
+from itertools import islice
 from random import SystemRandom
 
 rnd = SystemRandom()
