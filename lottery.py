@@ -18,7 +18,6 @@ class Lottery:
         self.len_extra = len_extra
         self.backend = None
         self.extraction = self.Extraction(None, None)
-        # self.many = None
         self._stop = None
 
     Extraction = namedtuple(
