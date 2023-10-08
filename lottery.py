@@ -1,6 +1,6 @@
 from collections import namedtuple
 from datetime import datetime
-from itertools import repeat
+from itertools import islice  # , repeat
 from random import SystemRandom
 
 rnd = SystemRandom()
@@ -18,7 +18,7 @@ class Lottery:
         self.len_extra = len_extra
         self.backend = None
         self.extraction = self.Extraction(None, None)
-        self.many = None
+        # self.many = None
         self._stop = None
 
     Extraction = namedtuple(
@@ -72,9 +72,6 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        # create an iterator that calls random.randint until it returns
-        # None, but since it is impossible to get None from it, it works
-        # as an infinite generator
         numbers = iter(lambda: rnd.randint(1, max_), None)
 
         combo = set()
@@ -90,25 +87,25 @@ class Lottery:
 
         return numbers, extra
 
-    def many_samples(self):
+    def many_samples(self, many):
         '''
         To add further randomness, this method simulates several
         extractions among 1 and <many> times, and picks one casually,
         hopefully the winning one :D
         '''
-        self._stop = rnd.randint(1, self.many or 1)
+        self._stop = rnd.randint(1, many or 1)
 
-        numbers, extra = None, None
-        for _ in repeat(None, self._stop):
-            numbers, extra = self.extract()
+        extractions = iter(self.extract, None)
+
+        numbers, extra = next(islice(
+            extractions, self._stop, self._stop + 1))
 
         return numbers, extra
 
     def __call__(self, backend=None, many=None):
-        self.many = many
         self.backend = backend
 
-        self.extraction = self.Extraction(*self.many_samples())
+        self.extraction = self.Extraction(*self.many_samples(many))
 
         return self
 
