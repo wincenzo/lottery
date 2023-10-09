@@ -116,3 +116,11 @@ class Lottery:
 
             if self.extraction.extra is not None:
                 print('Superstar:', *sorted(self.extraction.extra))
+
+
+if __name__ == '__main__':
+    print('Starting...')
+    superenalotto = Lottery(max_numbers=90, max_extra=90,
+                            len_numbers=6, len_extra=1)
+    superenalotto(backend='choice', many=1_000_000).draw
+    print(f'repeated {superenalotto._stop} times')
