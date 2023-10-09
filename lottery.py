@@ -110,17 +110,17 @@ class Lottery:
     def draw(self):
         now = datetime.now().strftime("%c")
 
-        if self.extraction is not None:
+        if self.extraction.numbers is not None:
             print('Estrazione del:', now, '\nNumeri Estratti:',
                   *sorted(self.extraction.numbers))
 
-            if self.extraction.extra is not None:
-                print('Superstar:', *sorted(self.extraction.extra))
+        if self.extraction.extra is not None:
+            print('Superstar:', *sorted(self.extraction.extra))
 
 
 if __name__ == '__main__':
     print('Starting...')
     superenalotto = Lottery(max_numbers=90, max_extra=90,
-                            len_numbers=6, len_extra=1)
+                            len_numbers=6, len_extra=0)
     superenalotto(backend='randint', many=1_000_000).draw
-    print(f'Repeated {superenalotto._stop} time(s)')
+    print(f'Extraction repeated {superenalotto._stop} time(s)')
