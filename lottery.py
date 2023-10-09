@@ -100,7 +100,7 @@ class Lottery:
 
         return numbers, extra
 
-    def __call__(self, backend=None, many=None):
+    def __call__(self, backend='sample', many=None):
         self.backend = backend
         self.extraction = self.Extraction(*self.many_samples(many))
 
@@ -122,5 +122,5 @@ if __name__ == '__main__':
     print('Starting...')
     superenalotto = Lottery(max_numbers=90, max_extra=90,
                             len_numbers=6, len_extra=1)
-    superenalotto(backend='choice', many=1_000_000).draw
-    print(f'repeated {superenalotto._stop} times')
+    superenalotto(backend='randint', many=1_000_000).draw
+    print(f'Repeated {superenalotto._stop} time(s)')
