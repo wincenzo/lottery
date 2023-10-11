@@ -1,6 +1,6 @@
 from collections import namedtuple
 from datetime import datetime
-from itertools import islice
+from itertools import islice, repeat, starmap
 from random import SystemRandom
 
 rnd = SystemRandom()
@@ -55,7 +55,7 @@ class Lottery:
             numbers.remove(number)
             return number
 
-        return frozenset(get_number() for _ in range(len_))
+        return frozenset(starmap(get_number, repeat((), len_)))
 
     @staticmethod
     def sample(len_, max_):
@@ -122,5 +122,5 @@ if __name__ == '__main__':
     print('Starting...')
     superenalotto = Lottery(max_numbers=90, max_extra=90,
                             len_numbers=6, len_extra=0)
-    superenalotto(backend='randint', many=1_000_000).draw
+    superenalotto(backend='choice', many=1_000_000).draw
     print(f'Extraction repeated {superenalotto._stop} time(s)')
