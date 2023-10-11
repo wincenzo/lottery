@@ -55,7 +55,8 @@ class Lottery:
             numbers.remove(number)
             return number
 
-        return frozenset(starmap(get_number, repeat((), len_)))
+        return frozenset(starmap(
+            get_number, repeat((), len_)))
 
     @staticmethod
     def sample(len_, max_):
@@ -81,8 +82,10 @@ class Lottery:
         return frozenset(extraction)
 
     def extract(self):
-        numbers = self._backend(self.len_numbers, self.max_numbers)
-        extra = self._backend(self.len_extra, self.max_extra)
+        numbers = self._backend(
+            self.len_numbers, self.max_numbers)
+        extra = self._backend(
+            self.len_extra, self.max_extra)
 
         return numbers, extra
 
