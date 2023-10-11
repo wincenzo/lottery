@@ -109,7 +109,6 @@ class Lottery:
 
         return self
 
-    @property
     def draw(self):
         now = datetime.now().strftime("%c")
 
@@ -125,5 +124,5 @@ if __name__ == '__main__':
     print('Starting...')
     superenalotto = Lottery(max_numbers=90, max_extra=90,
                             len_numbers=6, len_extra=0)
-    superenalotto(backend='choice', many=1_000_000).draw
-    print(f'Extraction repeated {superenalotto._stop} time(s)')
+    superenalotto(backend='choice', many=1_000_000).draw()
+    print(f'Estrazione ripetuta {superenalotto._stop} volte')
