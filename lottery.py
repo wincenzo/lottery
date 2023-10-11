@@ -111,8 +111,8 @@ class Lottery:
         now = datetime.now().strftime("%c")
 
         if self.extraction.numbers is not None:
-            print('Estrazione del:', now, '\nNumeri Estratti:',
-                  *sorted(self.extraction.numbers))
+            print('Estrazione del:', now,
+                  '\nNumeri Estratti:', *sorted(self.extraction.numbers))
 
         if self.extraction.extra is not None:
             print('Superstar:', *sorted(self.extraction.extra))
