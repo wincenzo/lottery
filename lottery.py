@@ -7,6 +7,9 @@ rnd = SystemRandom()
 
 
 class Lottery:
+    Extraction = namedtuple(
+        'Extraction', ('numbers', 'extra'))
+
     def __init__(self,
                  max_numbers=90,
                  len_numbers=6,
@@ -19,9 +22,6 @@ class Lottery:
         self.backend = None
         self.extraction = self.Extraction(None, None)
         self._stop = None
-
-    Extraction = namedtuple(
-        'Extraction', ('numbers', 'extra'))
 
     @property
     def backend(self):
@@ -36,6 +36,8 @@ class Lottery:
                 self._backend = self.randint
             case 'sample' | None:
                 self._backend = self.sample
+            case 'shuffle':
+                self._backend = self.shuffle
             case _:
                 raise ValueError('not a valid backend')
 
@@ -80,6 +82,16 @@ class Lottery:
             extraction.add(number)
 
         return frozenset(extraction)
+
+    @staticmethod
+    def shuffle(len_, max_):
+        if not (len_ and max_):
+            return None
+
+        numbers = list(range(1, max_ + 1))
+        rnd.shuffle(numbers)
+
+        return frozenset(numbers[:len_])
 
     def extract(self):
         numbers = self._backend(
