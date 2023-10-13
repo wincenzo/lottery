@@ -21,7 +21,7 @@ class Lottery:
         self.len_extra = len_extra
         self.backend = None
         self.extraction = self.Extraction(None, None)
-        self._stop = None
+        self.stop = None
 
     @property
     def backend(self):
@@ -103,14 +103,14 @@ class Lottery:
         extractions among 1 and <many> times, and picks one casually,
         hopefully the winning one :D
         '''
-        self._stop = rnd.randint(1, many or 1)
+        self.stop = rnd.randint(1, many or 1)
 
         extractions = zip(
             self.extract(self.len_numbers, self.max_numbers),
             self.extract(self.len_extra, self.max_extra))
 
         numbers, extra = next(islice(
-            extractions, self._stop, self._stop + 1))
+            extractions, self.stop, self.stop + 1))
 
         return numbers, extra
 
@@ -133,7 +133,10 @@ class Lottery:
 
 if __name__ == '__main__':
     print('Inizio...')
-    superenalotto = Lottery(max_numbers=90, max_extra=90,
-                            len_numbers=6, len_extra=0)
+
+    superenalotto = Lottery(
+        max_numbers=90, max_extra=90,
+        len_numbers=6, len_extra=0)
     superenalotto(backend='choice', many=1_000_000).draw()
-    print(f'Estrazione ripetuta {superenalotto._stop} volte')
+
+    print(f'Estrazione ripetuta {superenalotto.stop} volte')
