@@ -100,7 +100,7 @@ class Lottery:
     def many_samples(self, many):
         '''
         To add further randomness, this method simulates several
-        extractions among 1 and <many> times, and picks one casually,
+        extractions, and picks one casually among 1 and <many> times
         hopefully the winning one :D
         '''
         self.stop = rnd.randint(1, many or 1)
