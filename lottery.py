@@ -93,13 +93,9 @@ class Lottery:
 
         return frozenset(numbers[:len_])
 
-    def extract(self):
-        numbers = self._backend(
-            self.len_numbers, self.max_numbers)
-        extra = self._backend(
-            self.len_extra, self.max_extra)
-
-        return numbers, extra
+    def extract(self, len_, max_):
+        while True:
+            yield self._backend(len_, max_)
 
     def many_samples(self, many):
         '''
@@ -109,7 +105,10 @@ class Lottery:
         '''
         self._stop = rnd.randint(1, many or 1)
 
-        extractions = iter(self.extract, None)
+        extractions = zip(
+            self.extract(self.len_numbers, self.max_numbers),
+            self.extract(self.len_extra, self.max_extra))
+
         numbers, extra = next(islice(
             extractions, self._stop, self._stop + 1))
 
