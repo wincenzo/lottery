@@ -129,13 +129,13 @@ class Lottery:
             extra = ' '.join(map(str, sorted(self.extraction.extra)))
             extra = f'Superstar: {extra}'
 
-        return f'{numbers} \n{extra}' if extra else f'{numbers}'
+        return f'{numbers}\n{extra}' if extra else f'{numbers}'
 
 
 if __name__ == '__main__':
     superenalotto = Lottery(
         max_numbers=90, max_extra=90,
-        len_numbers=6, len_extra=0)
+        len_numbers=6, len_extra=1)
 
     print('Inizio...')
     print(superenalotto.draw(backend='choice', many=1_000_000))
