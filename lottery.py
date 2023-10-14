@@ -97,12 +97,13 @@ class Lottery:
         while True:
             yield self._backend(len_, max_)
 
-    def many_samples(self, many):
+    def draw(self, backend='sample', many=None):
         '''
-        To add further randomness, this method simulates several
-        extractions, and picks one casually among 1 and <many> times
-        hopefully the winning one :D
+        To add further randomness, it simulates several extractions,
+        and picks one casually among 1 and <many> times, hopefully the
+        winning one :D
         '''
+        self.backend = backend
         self.stop = rnd.randint(1, many or 1)
 
         extractions = zip(
@@ -112,31 +113,30 @@ class Lottery:
         numbers, extra = next(islice(
             extractions, self.stop, self.stop + 1))
 
-        return numbers, extra
-
-    def __call__(self, backend='sample', many=None):
-        self.backend = backend
-        self.extraction = self.Extraction(*self.many_samples(many))
+        self.extraction = self.Extraction(numbers, extra)
 
         return self
 
-    def draw(self):
+    def __str__(self):
         now = datetime.now().strftime("%c")
 
-        if self.extraction.numbers is not None:
-            print('Estrazione del:', now,
-                  '\nNumeri Estratti:', *sorted(self.extraction.numbers))
+        extra = ''
+
+        numbers = ' '.join(map(str, sorted(self.extraction.numbers)))
+        numbers = f'Estrazione del {now} \nNumeri estratti: {numbers}'
 
         if self.extraction.extra is not None:
-            print('Superstar:', *sorted(self.extraction.extra))
+            extra = ' '.join(map(str, sorted(self.extraction.extra)))
+            extra = f'Superstar: {extra}'
+
+        return f'{numbers} \n{extra}' if extra else f'{numbers}'
 
 
 if __name__ == '__main__':
-    print('Inizio...')
-
     superenalotto = Lottery(
         max_numbers=90, max_extra=90,
         len_numbers=6, len_extra=0)
-    superenalotto(backend='choice', many=1_000_000).draw()
 
+    print('Inizio...')
+    print(superenalotto.draw(backend='choice', many=1_000_000))
     print(f'Estrazione ripetuta {superenalotto.stop} volte')
