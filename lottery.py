@@ -14,13 +14,14 @@ class Lottery:
                  max_numbers=90,
                  len_numbers=6,
                  max_extra=90,
-                 len_extra=1):
+                 len_extra=1
+                 ):
         self.max_numbers = max_numbers
         self.max_extra = max_extra
         self.len_numbers = len_numbers
         self.len_extra = len_extra
-        self.backend = None
         self.extraction = self.Extraction(None, None)
+        self.backend = None
         self.stop = None
 
     @property
@@ -50,11 +51,11 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        numbers = list(range(1, max_ + 1))
+        pop = list(range(1, max_ + 1))
 
         def get_number():
-            number = rnd.choice(numbers)
-            numbers.remove(number)
+            number = rnd.choice(pop)
+            pop.remove(number)
             return number
 
         return frozenset(starmap(
@@ -65,9 +66,9 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        numbers = tuple(range(1, max_ + 1))
+        pop = tuple(range(1, max_ + 1))
 
-        return frozenset(rnd.sample(numbers, k=len_))
+        return frozenset(rnd.sample(pop, k=len_))
 
     @staticmethod
     def randint(len_, max_):
@@ -88,10 +89,10 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        numbers = list(range(1, max_ + 1))
-        rnd.shuffle(numbers)
+        pop = list(range(1, max_ + 1))
+        rnd.shuffle(pop)
 
-        return frozenset(numbers[:len_])
+        return frozenset(pop[:len_])
 
     def get_draw(self, len_, max_):
         while True:
