@@ -93,22 +93,22 @@ class Lottery:
 
         return frozenset(numbers[:len_])
 
-    def extract(self, len_, max_):
+    def get_draw(self, len_, max_):
         while True:
             yield self._backend(len_, max_)
 
     def draw(self, backend='sample', many=None):
         '''
         To add further randomness, it simulates several extractions,
-        and picks one casually among 1 and <many> times, hopefully the
-        winning one :D
+        and picks one casually among 1 and <many> times. Hopefully,
+        the winning one :D
         '''
         self.backend = backend
         self.stop = rnd.randint(1, many or 1)
 
         extractions = zip(
-            self.extract(self.len_numbers, self.max_numbers),
-            self.extract(self.len_extra, self.max_extra))
+            self.get_draw(self.len_numbers, self.max_numbers),
+            self.get_draw(self.len_extra, self.max_extra))
 
         numbers, extra = next(islice(
             extractions, self.stop, self.stop + 1))
@@ -120,7 +120,7 @@ class Lottery:
     def __str__(self):
         now = datetime.now().strftime("%c")
 
-        extra = ''
+        extra = None
 
         numbers = ' '.join(map(str, sorted(self.extraction.numbers)))
         numbers = f'Estrazione del {now} \nNumeri estratti: {numbers}'
@@ -129,13 +129,13 @@ class Lottery:
             extra = ' '.join(map(str, sorted(self.extraction.extra)))
             extra = f'Superstar: {extra}'
 
-        return f'{numbers}\n{extra}' if extra else f'{numbers}'
+        return f'{numbers}\n{extra}' if extra is not None else f'{numbers}'
 
 
 if __name__ == '__main__':
     superenalotto = Lottery(
-        max_numbers=90, max_extra=90,
-        len_numbers=6, len_extra=1)
+        max_numbers=90, len_numbers=6,
+        max_extra=90, len_extra=1)
 
     print('Inizio...')
     print(superenalotto.draw(backend='choice', many=1_000_000))
