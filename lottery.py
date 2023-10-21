@@ -94,11 +94,11 @@ class Lottery:
 
         return frozenset(pop[:len_])
 
-    def get_draw(self, len_, max_):
+    def draw(self, len_, max_):
         while True:
             yield self._backend(len_, max_)
 
-    def draw(self, backend='sample', many=None):
+    def __call__(self, backend='sample', many=None):
         '''
         To add further randomness, it simulates several extractions,
         and picks one casually among 1 and <many> times. Hopefully,
@@ -108,8 +108,8 @@ class Lottery:
         self.stop = rnd.randint(1, many or 1)
 
         extractions = zip(
-            self.get_draw(self.len_numbers, self.max_numbers),
-            self.get_draw(self.len_extra, self.max_extra))
+            self.draw(self.len_numbers, self.max_numbers),
+            self.draw(self.len_extra, self.max_extra))
 
         numbers, extra = next(islice(
             extractions, self.stop, self.stop + 1))
@@ -139,5 +139,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=1)
 
     print('Inizio...')
-    print(superenalotto.draw(backend='choice', many=1_000_000))
+    print(superenalotto(backend='choice', many=1_000_000))
     print(f'Estrazione ripetuta {superenalotto.stop} volte')
