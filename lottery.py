@@ -51,11 +51,11 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        pop = list(range(1, max_ + 1))
+        numbers = list(range(1, max_ + 1))
 
         def get_number():
-            number = rnd.choice(pop)
-            pop.remove(number)
+            number = rnd.choice(numbers)
+            numbers.remove(number)
             return number
 
         return frozenset(starmap(
@@ -139,5 +139,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=1)
 
     print('Inizio...')
-    print(superenalotto(backend='choice', many=1_000_000))
+    print(superenalotto(backend='sample', many=1_000_000))
     print(f'Estrazione ripetuta {superenalotto.stop} volte')
