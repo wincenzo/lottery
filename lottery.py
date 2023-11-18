@@ -66,9 +66,9 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        pop = tuple(range(1, max_ + 1))
+        all_numbers = tuple(range(1, max_ + 1))
 
-        return frozenset(rnd.sample(pop, k=len_))
+        return frozenset(rnd.sample(all_numbers, k=len_))
 
     @staticmethod
     def randint(len_, max_):
@@ -89,16 +89,16 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        pop = list(range(1, max_ + 1))
-        rnd.shuffle(pop)
+        all_numbers = list(range(1, max_ + 1))
+        rnd.shuffle(all_numbers)
 
-        return frozenset(pop[:len_])
+        return frozenset(all_numbers[:len_])
 
     def draw(self, len_, max_):
         while True:
             yield self._backend(len_, max_)
 
-    def __call__(self, backend='sample', many=None):
+    def __call__(self, backend=None, many=None):
         '''
         To add further randomness, it simulates several extractions,
         and picks one casually among 1 and <many> times. Hopefully,
@@ -121,16 +121,19 @@ class Lottery:
     def __str__(self):
         now = datetime.now().strftime("%c")
 
-        extra = None
+        numbers, extra = self.extraction
 
-        numbers = ' '.join(map(str, sorted(self.extraction.numbers)))
+        numbers = ' '.join(map(str, sorted(numbers)))
         numbers = f'Estrazione del {now} \nNumeri estratti: {numbers}'
 
-        if self.extraction.extra is not None:
-            extra = ' '.join(map(str, sorted(self.extraction.extra)))
+        if extra is not None:
+            extra = ' '.join(map(str, sorted(extra)))
             extra = f'Superstar: {extra}'
 
-        return f'{numbers}\n{extra}' if extra is not None else f'{numbers}'
+            return f'{numbers}\n{extra}'
+
+        else:
+            return f'{numbers}'
 
 
 if __name__ == '__main__':
