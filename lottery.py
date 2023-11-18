@@ -14,7 +14,7 @@ class Lottery:
                  max_numbers=90,
                  len_numbers=6,
                  max_extra=90,
-                 len_extra=1
+                 len_extra=1,
                  ):
         self.max_numbers = max_numbers
         self.max_extra = max_extra
