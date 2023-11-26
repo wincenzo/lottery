@@ -12,13 +12,13 @@ class Lottery:
 
     def __init__(self,
                  max_numbers=90,
-                 len_numbers=6,
+                 len_draw=6,
                  max_extra=90,
                  len_extra=1,
                  ):
         self.max_numbers = max_numbers
         self.max_extra = max_extra
-        self.len_numbers = len_numbers
+        self.len_draw = len_draw
         self.len_extra = len_extra
         self.extraction = self.Extraction(None, None)
         self.backend = None
@@ -66,9 +66,9 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        all_numbers = tuple(range(1, max_ + 1))
+        numbers = tuple(range(1, max_ + 1))
 
-        return frozenset(rnd.sample(all_numbers, k=len_))
+        return frozenset(rnd.sample(numbers, k=len_))
 
     @staticmethod
     def randint(len_, max_):
@@ -89,10 +89,10 @@ class Lottery:
         if not (len_ and max_):
             return None
 
-        all_numbers = list(range(1, max_ + 1))
-        rnd.shuffle(all_numbers)
+        numbers = list(range(1, max_ + 1))
+        rnd.shuffle(numbers)
 
-        return frozenset(all_numbers[:len_])
+        return frozenset(numbers[:len_])
 
     def draw(self, len_, max_):
         while True:
@@ -108,7 +108,7 @@ class Lottery:
         self.stop = rnd.randint(1, many or 1)
 
         extractions = zip(
-            self.draw(self.len_numbers, self.max_numbers),
+            self.draw(self.len_draw, self.max_numbers),
             self.draw(self.len_extra, self.max_extra))
 
         numbers, extra = next(islice(
@@ -138,7 +138,7 @@ class Lottery:
 
 if __name__ == '__main__':
     superenalotto = Lottery(
-        max_numbers=90, len_numbers=6,
+        max_numbers=90, len_draw=6,
         max_extra=90, len_extra=1)
 
     print('Inizio...')
