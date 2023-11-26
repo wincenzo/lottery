@@ -48,9 +48,6 @@ class Lottery:
 
     @staticmethod
     def choice(len_, max_):
-        if not (len_ and max_):
-            return None
-
         numbers = list(range(1, max_ + 1))
 
         def get_number():
@@ -63,18 +60,12 @@ class Lottery:
 
     @staticmethod
     def sample(len_, max_):
-        if not (len_ and max_):
-            return None
-
         numbers = tuple(range(1, max_ + 1))
 
         return frozenset(rnd.sample(numbers, k=len_))
 
     @staticmethod
     def randint(len_, max_):
-        if not (len_ and max_):
-            return None
-
         draw = iter(lambda: rnd.randint(1, max_), None)
 
         extraction = set()
@@ -86,9 +77,6 @@ class Lottery:
 
     @staticmethod
     def shuffle(len_, max_):
-        if not (len_ and max_):
-            return None
-
         numbers = list(range(1, max_ + 1))
         rnd.shuffle(numbers)
 
@@ -96,7 +84,10 @@ class Lottery:
 
     def draw(self, len_, max_):
         while True:
-            yield self._backend(len_, max_)
+            if len_ and max_:
+                yield self._backend(len_, max_)
+            else:
+                yield None
 
     def __call__(self, backend=None, many=None):
         '''
@@ -139,7 +130,7 @@ class Lottery:
 if __name__ == '__main__':
     superenalotto = Lottery(
         max_numbers=90, len_draw=6,
-        max_extra=90, len_extra=1)
+        max_extra=90, len_extra=0)
 
     print('Inizio...')
     print(superenalotto(backend='sample', many=1_000_000))
