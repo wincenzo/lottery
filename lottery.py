@@ -82,7 +82,7 @@ class Lottery:
 
         return frozenset(numbers[:len_])
 
-    def draw(self, len_, max_):
+    def drawer(self, len_, max_):
         while True:
             if len_ and max_:
                 yield self._backend(len_, max_)
@@ -99,38 +99,38 @@ class Lottery:
         self.stop = rnd.randint(1, many or 1)
 
         extractions = zip(
-            self.draw(self.len_draw, self.max_numbers),
-            self.draw(self.len_extra, self.max_extra))
+            self.drawer(self.len_draw, self.max_numbers),
+            self.drawer(self.len_extra, self.max_extra))
 
-        numbers, extra = next(islice(
+        draw, extra = next(islice(
             extractions, self.stop, self.stop + 1))
 
-        self.extraction = self.Extraction(numbers, extra)
+        self.extraction = self.Extraction(draw, extra)
 
         return self
 
     def __str__(self):
         now = datetime.now().strftime("%c")
 
-        numbers, extra = self.extraction
+        draw, extra = self.extraction
 
-        numbers = ' '.join(map(str, sorted(numbers)))
-        numbers = f'Estrazione del {now} \nNumeri estratti: {numbers}'
+        draw = ' '.join(map(str, sorted(draw)))
+        draw = f'Estrazione del {now} \nNumeri estratti: {draw}'
 
         if extra is not None:
             extra = ' '.join(map(str, sorted(extra)))
             extra = f'Superstar: {extra}'
 
-            return f'{numbers}\n{extra}'
+            return f'{draw}\n{extra}'
 
         else:
-            return f'{numbers}'
+            return f'{draw}'
 
 
 if __name__ == '__main__':
     superenalotto = Lottery(
         max_numbers=90, len_draw=6,
-        max_extra=90, len_extra=0)
+        max_extra=90, len_extra=1)
 
     print('Inizio...')
     print(superenalotto(backend='sample', many=1_000_000))
