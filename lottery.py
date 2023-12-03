@@ -91,8 +91,8 @@ class Lottery:
 
     def __call__(self, backend=None, many=None):
         '''
-        To add further randomness, it simulates several extractions,
-        and picks one casually among 1 and <many> times. Hopefully,
+        To add further randomness, it simulates several extractions
+        among 1 and <many> times, and picks one casually. Hopefully,
         the winning one :D
         '''
         self.backend = backend
