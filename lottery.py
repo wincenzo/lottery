@@ -50,13 +50,13 @@ class Lottery:
     def choice(len_, max_):
         numbers = list(range(1, max_ + 1))
 
-        def get_number():
+        def draw():
             number = rnd.choice(numbers)
             numbers.remove(number)
             return number
 
         return frozenset(starmap(
-            get_number, repeat((), len_)))
+            draw, repeat((), len_)))
 
     @staticmethod
     def sample(len_, max_):
@@ -133,5 +133,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=1)
 
     print('Inizio...')
-    print(superenalotto(backend='sample', many=1_000_000))
+    print(superenalotto(backend='shuffle', many=1_000_000))
     print(f'Estrazione ripetuta {superenalotto.stop} volte')
