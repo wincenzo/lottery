@@ -83,11 +83,10 @@ class Lottery:
         return frozenset(numbers[:len_])
 
     def drawer(self, len_, max_):
+        valid = bool(len_ and max_)
+
         while True:
-            if len_ and max_:
-                yield self._backend(len_, max_)
-            else:
-                yield None
+            yield self._backend(len_, max_) if valid else None
 
     def __call__(self, backend=None, many=None):
         '''
@@ -133,5 +132,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=1)
 
     print('Inizio...')
-    print(superenalotto(backend='shuffle', many=1_000_000))
+    print(superenalotto(backend='choice', many=1_000_000))
     print(f'Estrazione ripetuta {superenalotto.stop} volte')
