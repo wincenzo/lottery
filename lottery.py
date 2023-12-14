@@ -8,7 +8,7 @@ rnd = SystemRandom()
 
 class Lottery:
     Extraction = namedtuple(
-        'Extraction', ('numbers', 'extra'))
+        'Extraction', ('draw', 'extra'))
 
     def __init__(self,
                  max_numbers=90,
@@ -110,14 +110,12 @@ class Lottery:
 
     def __str__(self):
         now = datetime.now().strftime("%c")
-
-        draw, extra = self.extraction
-
-        draw = ' '.join(map(str, sorted(draw)))
+        
+        draw = ' '.join(map(str, sorted(self.extraction.draw)))
         draw = f'Estrazione del {now} \nNumeri estratti: {draw}'
 
-        if extra is not None:
-            extra = ' '.join(map(str, sorted(extra)))
+        if self.extraction.extra is not None:
+            extra = ' '.join(map(str, sorted(self.extraction.extra)))
             extra = f'Superstar: {extra}'
 
             return f'{draw}\n{extra}'
@@ -129,7 +127,7 @@ class Lottery:
 if __name__ == '__main__':
     superenalotto = Lottery(
         max_numbers=90, len_draw=6,
-        max_extra=90, len_extra=1)
+        max_extra=90, len_extra=0)
 
     print('Inizio...')
     print(superenalotto(backend='choice', many=1_000_000))
