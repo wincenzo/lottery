@@ -83,7 +83,7 @@ class Lottery:
         return frozenset(numbers[:len_])
 
     def drawer(self, len_, max_):
-        valid = bool(len_ and max_)
+        valid = len_ and max_
 
         while True:
             yield self._backend(len_, max_) if valid else None
