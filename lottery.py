@@ -22,15 +22,15 @@ class Lottery:
         self.len_extra = len_extra
         self.extraction = self.Extraction(None, None)
         self.backend = None
-        self.stop = None
+        self.stop = 1
 
     @property
     def backend(self):
         return self._backend
 
     @backend.setter
-    def backend(self, value):
-        match value:
+    def backend(self, name):
+        match name:
             case 'choice':
                 self._backend = self.choice
             case 'randint':
@@ -88,7 +88,7 @@ class Lottery:
         while True:
             yield self._backend(len_, max_) if valid else None
 
-    def __call__(self, backend=None, many=None):
+    def __call__(self, backend=None, many=0):
         '''
         To add further randomness, it simulates several extractions
         among 1 and <many> times, and picks one casually. Hopefully,
@@ -130,5 +130,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=0)
 
     print('Inizio...')
-    print(superenalotto(backend='choice', many=1_000_000))
+    print(superenalotto(backend='choice', many=100_000))
     print(f'Estrazione ripetuta {superenalotto.stop} volte')
