@@ -109,10 +109,10 @@ class Lottery:
         return self
 
     def __str__(self):
-        now = datetime.now().strftime("%c")
+        now = datetime.now()
         
         draw = ' '.join(map(str, sorted(self.extraction.draw)))
-        draw = f'Estrazione del {now} \nNumeri estratti: {draw}'
+        draw = f'Estrazione del {now:%c} \nNumeri estratti: {draw}'
 
         if self.extraction.extra is not None:
             extra = ' '.join(map(str, sorted(self.extraction.extra)))
