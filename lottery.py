@@ -112,7 +112,7 @@ class Lottery:
         now = datetime.now()
         
         draw = ' '.join(map(str, sorted(self.extraction.draw)))
-        draw = f'Estrazione del {now:%c} \nNumeri estratti: {draw}'
+        draw = f'Estrazione del {now:%x %X} \nNumeri estratti: {draw}'
 
         if self.extraction.extra is not None:
             extra = ' '.join(map(str, sorted(self.extraction.extra)))
