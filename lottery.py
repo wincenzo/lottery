@@ -2,7 +2,7 @@ from collections import namedtuple
 from datetime import datetime
 from itertools import islice, repeat, starmap
 from random import SystemRandom
-from typing import Iterator, Optional, Literal, Self
+from typing import Iterator, Literal, Self
 
 rnd = SystemRandom()
 
