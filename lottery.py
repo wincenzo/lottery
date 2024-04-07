@@ -110,7 +110,7 @@ class Lottery:
 
     def __str__(self):
         now = datetime.now()
-        
+
         draw = ' '.join(map(str, sorted(self.extraction.draw)))
         draw = f'Estrazione del {now:%x %X} \nNumeri estratti: {draw}'
 
@@ -122,6 +122,10 @@ class Lottery:
 
         else:
             return f'{draw}'
+
+    def __repr__(self) -> str:
+        return (f'Lottery(max_numbers={self.max_numbers}, max_extra={self.max_extra},'
+                f' len_draw={self.len_draw}, len_extra={self.len_extra})')
 
 
 if __name__ == '__main__':
