@@ -93,7 +93,7 @@ class Lottery:
 
     def drawer(self,
                len_: int,
-               max_: int) -> Iterator[frozenset | None]:
+               max_: int) -> Iterator[frozenset[int] | None]:
 
         valid = len_ and max_
 
@@ -125,6 +125,7 @@ class Lottery:
         return self
 
     def __str__(self) -> str:
+        
         now = datetime.now()
 
         draw = ' '.join(map(str, sorted(self.extraction.draw)))
