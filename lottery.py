@@ -23,8 +23,7 @@ class Lottery:
         self.len_draw = len_draw
         self.len_extra = len_extra
         self.extraction = self.Extraction(None, None)
-        self.backend = None
-        self.stop = 1
+        self._stop = 1
 
     @property
     def backend(self):
@@ -111,14 +110,14 @@ class Lottery:
         '''
 
         self.backend = backend
-        self.stop = rnd.randint(1, many or 1)
+        self._stop = rnd.randint(1, many or 1)
 
         extractions = zip(
             self.drawer(self.len_draw, self.max_numbers),
             self.drawer(self.len_extra, self.max_extra))
 
         draw, extra = next(islice(
-            extractions, self.stop, self.stop + 1))
+            extractions, self._stop, self._stop + 1))
 
         self.extraction = self.Extraction(draw, extra)
 
@@ -152,5 +151,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=0)
 
     print('Inizio...')
-    print(superenalotto(backend='choice', many=100_000))
-    print(f'Estrazione ripetuta {superenalotto.stop} volte')
+    print(superenalotto(backend='randint', many=200_000))
+    print(f'Estrazione ripetuta {superenalotto._stop} volte')
