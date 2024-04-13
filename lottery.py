@@ -88,7 +88,10 @@ class Lottery:
         numbers = list(range(1, max_ + 1))
         rnd.shuffle(numbers)
 
-        return frozenset(numbers[:len_])
+        start = rnd.randint(1,90)
+        grab = slice(start, start + len_)
+
+        return frozenset(numbers[grab])
 
     def drawer(self,
                len_: int,
@@ -151,5 +154,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=0)
 
     print('Inizio...')
-    print(superenalotto(backend='randint', many=200_000))
+    print(superenalotto(backend='shuffle', many=200_000))
     print(f'Estrazione ripetuta {superenalotto._stop} volte')
