@@ -88,7 +88,7 @@ class Lottery:
         numbers = list(range(1, max_ + 1))
         rnd.shuffle(numbers)
 
-        start = rnd.randint(1,90)
+        start = rnd.randint(0, max_-len_)
         grab = slice(start, start + len_)
 
         return frozenset(numbers[grab])
@@ -127,7 +127,7 @@ class Lottery:
         return self
 
     def __str__(self) -> str:
-        
+
         now = datetime.now()
 
         draw = ' '.join(map(str, sorted(self.extraction.draw)))
