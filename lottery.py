@@ -2,7 +2,7 @@ from collections import namedtuple
 from datetime import datetime
 from itertools import islice, repeat, starmap
 from random import SystemRandom
-from typing import Iterator, Literal, Self
+from typing import Iterator, Literal, Self, Optional
 
 rnd = SystemRandom()
 
@@ -51,51 +51,50 @@ class Lottery:
         return self._backend.__name__
 
     @staticmethod
-    def choice(len_: int, max_: int) -> frozenset[int]:
+    def choice(len_: int, max_: int) -> tuple[int, ...]:
 
-        numbers = list(range(1, max_ + 1))
+        numbers = list(range(1, max_+1))
 
         def draw():
             number = rnd.choice(numbers)
             numbers.remove(number)
             return number
 
-        return frozenset(starmap(
-            draw, repeat((), len_)))
+        return tuple(starmap(draw, repeat((), len_)))
 
     @staticmethod
-    def sample(len_: int, max_: int) -> frozenset[int]:
+    def sample(len_: int, max_: int) -> tuple[int, ...]:
 
-        numbers = tuple(range(1, max_ + 1))
+        numbers = range(1, max_+1)
 
-        return frozenset(rnd.sample(numbers, k=len_))
+        return tuple(rnd.sample(numbers, k=len_))
 
     @staticmethod
-    def randint(len_: int, max_: int) -> frozenset[int]:
+    def randint(len_: int, max_: int) -> tuple[int, ...]:
 
         draw = iter(lambda: rnd.randint(1, max_), None)
 
         extraction = set()
         while len_ - len(extraction):
-            number = next(draw)
-            extraction.add(number)
+            extraction.add(next(draw))
 
-        return frozenset(extraction)
+        return tuple(extraction)
 
     @staticmethod
-    def shuffle(len_: int, max_: int) -> frozenset[int]:
+    def shuffle(len_: int, max_: int) -> tuple[int, ...]:
 
-        numbers = list(range(1, max_ + 1))
+        numbers = list(range(1, max_+1))
         rnd.shuffle(numbers)
 
-        start = rnd.randint(0, max_-len_)
-        grab = slice(start, start + len_)
+        idx = rnd.randint(0, max_-len_)
+        grab = slice(idx, idx + len_)
 
-        return frozenset(numbers[grab])
+        return tuple(numbers[grab])
 
     def drawer(self,
                len_: int,
-               max_: int) -> Iterator[frozenset[int] | None]:
+               max_: int,
+               ) -> Iterator[tuple[int, ...] | None]:
 
         valid = len_ and max_
 
@@ -105,7 +104,7 @@ class Lottery:
     def __call__(self,
                  backend: Literal['choice', 'randint',
                                   'sample', 'shuffle'],
-                 many: int = 0) -> Self:
+                 many: Optional[int] = None) -> Self:
         '''
         To add further randomness, it simulates several extractions
         among 1 and <many> times, and picks one casually. Hopefully,
@@ -117,12 +116,14 @@ class Lottery:
 
         extractions = zip(
             self.drawer(self.len_draw, self.max_numbers),
-            self.drawer(self.len_extra, self.max_extra))
+            self.drawer(self.len_extra, self.max_extra)
+        )
 
-        draw, extra = next(islice(
-            extractions, self._stop, self._stop + 1))
+        extraction = next(
+            islice(extractions, self._stop, self._stop+1)
+        )
 
-        self.extraction = self.Extraction(draw, extra)
+        self.extraction = self.Extraction._make(extraction)
 
         return self
 
@@ -154,5 +155,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=0)
 
     print('Inizio...')
-    print(superenalotto(backend='shuffle', many=200_000))
+    print(superenalotto(backend='sample', many=200_000))
     print(f'Estrazione ripetuta {superenalotto._stop} volte')
