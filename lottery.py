@@ -2,12 +2,13 @@ from collections import namedtuple
 from datetime import datetime
 from itertools import islice, repeat, starmap
 from random import SystemRandom
-from typing import Iterator, Literal, Self, Optional
+from typing import Iterator, Literal, Optional, Self
 
 rnd = SystemRandom()
 
 
 class Lottery:
+    
     Extraction = namedtuple(
         'Extraction', ('draw', 'extra'))
 
