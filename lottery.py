@@ -8,7 +8,7 @@ rnd = SystemRandom()
 
 
 class Lottery:
-    
+
     Extraction = namedtuple(
         'Extraction', ('draw', 'extra'))
 
@@ -87,8 +87,10 @@ class Lottery:
         numbers = list(range(1, max_+1))
         rnd.shuffle(numbers)
 
-        idx = rnd.randint(0, max_-len_)
-        grab = slice(idx, idx + len_)
+        start = rnd.randint(0, max_-len_)
+        step = (max_ - start) // len_
+        stop = start + len_ * step
+        grab = slice(start, stop, step)
 
         return numbers[grab]
 
