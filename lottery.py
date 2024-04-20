@@ -2,7 +2,7 @@ from collections import namedtuple
 from datetime import datetime
 from itertools import islice, repeat, starmap
 from random import SystemRandom
-from typing import Iterator, Literal, Optional, Self
+from typing import Iterator, Literal, Optional, Self, Iterable
 
 rnd = SystemRandom()
 
@@ -64,14 +64,14 @@ class Lottery:
         return tuple(starmap(draw, repeat((), len_)))
 
     @staticmethod
-    def sample(len_: int, max_: int) -> tuple[int, ...]:
+    def sample(len_: int, max_: int) -> list[int]:
 
         numbers = range(1, max_+1)
 
-        return tuple(rnd.sample(numbers, k=len_))
+        return rnd.sample(numbers, k=len_)
 
     @staticmethod
-    def randint(len_: int, max_: int) -> tuple[int, ...]:
+    def randint(len_: int, max_: int) -> set[int]:
 
         draw = iter(lambda: rnd.randint(1, max_), None)
 
@@ -79,10 +79,10 @@ class Lottery:
         while len_ - len(extraction):
             extraction.add(next(draw))
 
-        return tuple(extraction)
+        return extraction
 
     @staticmethod
-    def shuffle(len_: int, max_: int) -> tuple[int, ...]:
+    def shuffle(len_: int, max_: int) -> list[int]:
 
         numbers = list(range(1, max_+1))
         rnd.shuffle(numbers)
@@ -90,12 +90,12 @@ class Lottery:
         idx = rnd.randint(0, max_-len_)
         grab = slice(idx, idx + len_)
 
-        return tuple(numbers[grab])
+        return numbers[grab]
 
     def drawer(self,
                len_: int,
                max_: int,
-               ) -> Iterator[tuple[int, ...] | None]:
+               ) -> Iterator[Iterable[int] | None]:
 
         valid = len_ and max_
 
@@ -156,5 +156,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=0)
 
     print('Inizio...')
-    print(superenalotto(backend='sample', many=200_000))
+    print(superenalotto(backend='shuffle', many=200_000))
     print(f'Estrazione ripetuta {superenalotto._stop} volte')
