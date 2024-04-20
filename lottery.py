@@ -1,6 +1,7 @@
 from collections import namedtuple
 from datetime import datetime
 from itertools import islice, repeat, starmap
+from operator import itemgetter
 from random import SystemRandom
 from typing import Iterable, Iterator, Literal, Optional, Self
 
@@ -28,12 +29,10 @@ class Lottery:
 
     @property
     def backend(self):
-
         return self._backend
 
     @backend.setter
     def backend(self, name):
-
         match name:
             case 'choice':
                 self._backend = self.choice
@@ -48,12 +47,10 @@ class Lottery:
 
     @backend.getter
     def backend(self):
-
         return self._backend.__name__
 
     @staticmethod
     def choice(len_: int, max_: int) -> tuple[int, ...]:
-
         numbers = list(range(1, max_+1))
 
         def draw():
@@ -64,15 +61,14 @@ class Lottery:
         return tuple(starmap(draw, repeat((), len_)))
 
     @staticmethod
-    def sample(len_: int, max_: int) -> list[int]:
-
+    def sample(len_: int, max_: int) -> tuple[int, ...]:
         numbers = range(1, max_+1)
+        indxs = itemgetter(*rnd.sample(range(90), k=len_))
 
-        return rnd.sample(numbers, k=len_)
+        return indxs(numbers)
 
     @staticmethod
     def randint(len_: int, max_: int) -> set[int]:
-
         draw = iter(lambda: rnd.randint(1, max_), None)
 
         extraction = set()
@@ -83,7 +79,6 @@ class Lottery:
 
     @staticmethod
     def shuffle(len_: int, max_: int) -> list[int]:
-
         numbers = list(range(1, max_+1))
         rnd.shuffle(numbers)
 
@@ -113,7 +108,6 @@ class Lottery:
         among 1 and <many> times, and picks one casually. Hopefully,
         the winning one :D
         '''
-
         self.backend = backend
         self._stop = rnd.randint(1, many or 1)
 
@@ -131,7 +125,6 @@ class Lottery:
         return self
 
     def __str__(self) -> str:
-
         now = datetime.now()
 
         draw = ' '.join(map(str, sorted(self.extraction.draw)))
@@ -147,7 +140,6 @@ class Lottery:
             return f'{draw}'
 
     def __repr__(self) -> str:
-
         return (f'Lottery(max_numbers={self.max_numbers}, max_extra={self.max_extra},'
                 f' len_draw={self.len_draw}, len_extra={self.len_extra})')
 
@@ -158,5 +150,5 @@ if __name__ == '__main__':
         max_extra=90, len_extra=0)
 
     print('Inizio...')
-    print(superenalotto(backend='shuffle', many=200_000))
+    print(superenalotto(backend='sample', many=200_000))
     print(f'Estrazione ripetuta {superenalotto._stop} volte')
