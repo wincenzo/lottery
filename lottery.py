@@ -1,5 +1,4 @@
 import argparse
-from collections import namedtuple
 from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
