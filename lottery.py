@@ -4,15 +4,17 @@ from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Iterable, Iterator, Literal, Optional, Self
+from typing import Iterable, Iterator, Literal, NamedTuple, Optional, Self
 
 rnd = SystemRandom()
 
 
-class Lottery:
+class Extraction(NamedTuple):
+    draw: Iterable[int]
+    extra: Optional[Iterable[int]]
 
-    Extraction = namedtuple(
-        'Extraction', ('draw', 'extra'))
+
+class Lottery:
 
     def __init__(self,
                  max_numbers: int = 90,
@@ -25,7 +27,6 @@ class Lottery:
         self.max_extra = max_extra
         self.len_draw = len_draw
         self.len_extra = len_extra
-        self.extraction = self.Extraction(None, None)
         self._stop = 1
 
     @property
@@ -89,9 +90,7 @@ class Lottery:
 
         return numbers[grab]
 
-    def drawer(self,
-               len_: int,
-               max_: int,
+    def drawer(self, len_: int, max_: int,
                ) -> Iterator[Iterable[int] | None]:
 
         valid = len_ and max_
@@ -120,7 +119,7 @@ class Lottery:
             islice(extractions, self._stop, self._stop+1)
         )
 
-        self.extraction = self.Extraction._make(extraction)
+        self.extraction = Extraction._make(extraction)
 
         return self
 
