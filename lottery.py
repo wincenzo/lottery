@@ -146,9 +146,12 @@ class Lottery:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-b', '--backend', action='store', default='sample',
+    parser.add_argument('-b', '--backend', action='store', default='sample', type=str,
                         choices=('shuffle', 'sample', 'randint', 'choice'),
                         help='select the desired backend to draw numbers')
+    parser.add_argument('-m', '--many', action='store', default='100_000', type=int,
+                        help='''select how many times to draw numbers before randomly 
+                        choose one extraction''')
 
     args = parser.parse_args()
 
@@ -157,7 +160,7 @@ if __name__ == '__main__':
         max_extra=90, len_extra=0)
 
     print('Inizio...')
-    print(superenalotto(backend=args.backend, many=200_000),
+    print(superenalotto(backend=args.backend, many=args.many),
           f'Estrazione ripetuta {superenalotto._stop} volte',
           f'Backend: {args.backend}',
           sep='\n')
