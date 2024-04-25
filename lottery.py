@@ -1,3 +1,4 @@
+import argparse
 from collections import namedtuple
 from datetime import datetime
 from itertools import islice, repeat, starmap
@@ -62,10 +63,9 @@ class Lottery:
 
     @staticmethod
     def sample(len_: int, max_: int) -> tuple[int, ...]:
-        numbers = range(1, max_+1)
-        indxs = itemgetter(*rnd.sample(range(90), k=len_))
+        indexes = itemgetter(*rnd.sample(range(90), k=len_))
 
-        return indxs(numbers)
+        return tuple(indexes(range(1, max_+1)))
 
     @staticmethod
     def randint(len_: int, max_: int) -> set[int]:
@@ -145,10 +145,19 @@ class Lottery:
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-b', '--backend', action='store', default='sample',
+                        choices=('shuffle', 'sample', 'randint', 'choice'),
+                        help='select the desired backend to draw numbers')
+
+    args = parser.parse_args()
+
     superenalotto = Lottery(
         max_numbers=90, len_draw=6,
         max_extra=90, len_extra=0)
 
     print('Inizio...')
-    print(superenalotto(backend='sample', many=200_000))
-    print(f'Estrazione ripetuta {superenalotto._stop} volte')
+    print(superenalotto(backend=args.backend, many=200_000),
+          f'Estrazione ripetuta {superenalotto._stop} volte',
+          f'Backend: {args.backend}',
+          sep='\n')
