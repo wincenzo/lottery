@@ -83,7 +83,8 @@ class Lottery:
         rnd.shuffle(numbers)
 
         start = rnd.randint(0, max_-len_)
-        step = (max_ - start) // len_
+        max_step = (max_ - start) // len_
+        step = rnd.randint(1, max_step)
         stop = start + len_ * step
         grab = slice(start, stop, step)
 
