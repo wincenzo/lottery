@@ -1,14 +1,16 @@
 import argparse
+from dataclasses import dataclass
 from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Iterable, Iterator, Literal, NamedTuple, Optional, Self
+from typing import Iterable, Iterator, Literal, Optional, Self
 
 rnd = SystemRandom()
 
 
-class Extraction(NamedTuple):
+@dataclass
+class Extraction:
     draw: Iterable[int]
     extra: Optional[Iterable[int]]
 
@@ -18,14 +20,14 @@ class Lottery:
     def __init__(self,
                  max_numbers: int = 90,
                  len_draw: int = 6,
-                 max_extra: int = 90,
-                 len_extra: int = 1,
+                 max_extra: Optional[int] = None,
+                 len_extra: Optional[int] = None,
                  ) -> None:
 
         self.max_numbers = max_numbers
-        self.max_extra = max_extra
+        self.max_extra = max_extra or 0
         self.len_draw = len_draw
-        self.len_extra = len_extra
+        self.len_extra = len_extra or 0
         self._stop = 1
 
     @property
@@ -64,8 +66,12 @@ class Lottery:
     @staticmethod
     def sample(len_: int, max_: int) -> tuple[int, ...]:
         indexes = itemgetter(*rnd.sample(range(90), k=len_))
+        numbers = indexes(range(1, max_+1))
 
-        return tuple(indexes(range(1, max_+1)))
+        if isinstance(numbers, tuple):
+            return numbers
+        else:
+            return (numbers,)
 
     @staticmethod
     def randint(len_: int, max_: int) -> set[int]:
@@ -90,13 +96,22 @@ class Lottery:
 
         return numbers[grab]
 
-    def drawer(self, len_: int, max_: int,
-               ) -> Iterator[Iterable[int] | None]:
-
-        valid = len_ and max_
+    def main_drawer(self, len_: int, max_: int,
+                    ) -> Iterator[Iterable[int]]:
 
         while True:
-            yield self._backend(len_, max_) if valid else None
+            numbers = self._backend(len_, max_)
+            print('numbers: ', *numbers, end='\r', flush=True)
+            yield numbers
+
+    def extra_drawer(self, len_: int, max_: int,
+                     ) -> Iterator[Iterable[int] | None]:
+
+        while True:
+            numbers = self._backend(len_, max_) if (len_ and max_) else None
+            if numbers is not None:
+                print('extras: ', *numbers, end='\r', flush=True)
+            yield numbers
 
     def __call__(self,
                  backend: Literal['choice', 'randint',
@@ -111,21 +126,20 @@ class Lottery:
         self._stop = rnd.randint(1, many or 1)
 
         extractions = zip(
-            self.drawer(self.len_draw, self.max_numbers),
-            self.drawer(self.len_extra, self.max_extra)
+            self.main_drawer(self.len_draw, self.max_numbers),
+            self.extra_drawer(self.len_extra, self.max_extra)
         )
 
         extraction = next(
             islice(extractions, self._stop, self._stop+1)
         )
 
-        self.extraction = Extraction._make(extraction)
+        self.extraction = Extraction(*extraction)
 
         return self
 
     def __str__(self) -> str:
         now = datetime.now()
-
         draw = ' '.join(map(str, sorted(self.extraction.draw)))
         draw = f'Estrazione del {now:%x %X} \nNumeri estratti: {draw}'
 
@@ -148,17 +162,25 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--backend', action='store', default='sample', type=str,
                         choices=('shuffle', 'sample', 'randint', 'choice'),
                         help='select the desired backend to draw numbers')
-    parser.add_argument('-m', '--many', action='store', default='100_000', type=int,
-                        help='''select how many times to draw numbers before randomly 
+    parser.add_argument('-m', '--many', action='store', default=100_000, type=int,
+                        help='''select how many times to draw before randomly 
                         choose one extraction''')
+    parser.add_argument('-n', '--numbers', action='store', default=90, type=int,
+                        help='select upper linit for numbers')
+    parser.add_argument('-e', '--extras', action='store', default=90, type=int,
+                        help='select upper limit for extras')
+    parser.add_argument('--lenum', action='store', default=6, type=int,
+                        help='select how many numbers to draw')
+    parser.add_argument('--lenex', action='store', default=None, type=int,
+                        help='select how many extra numbers to draw')
 
     args = parser.parse_args()
 
     superenalotto = Lottery(
-        max_numbers=90, len_draw=6,
-        max_extra=90, len_extra=0)
+        max_numbers=args.numbers, len_draw=args.lenum,
+        max_extra=args.extras, len_extra=args.lenex)
 
-    print('Inizio...')
+    print('Estraendo...')
     print(superenalotto(backend=args.backend, many=args.many),
           f'Estrazione ripetuta {superenalotto._stop} volte',
           f'Backend: {args.backend}', sep='\n')
