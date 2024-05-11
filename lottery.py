@@ -71,7 +71,7 @@ class Lottery:
         if isinstance(numbers, tuple):
             return numbers
         else:
-            return (numbers,)
+            return numbers,
 
     @staticmethod
     def randint(len_: int, max_: int) -> set[int]:
