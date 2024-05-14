@@ -102,6 +102,7 @@ class Lottery:
         while True:
             numbers = self._backend(len_, max_)
             print('numbers: ', *numbers, end='\r', flush=True)
+            
             yield numbers
 
     def extra_drawer(self, len_: int, max_: int,
@@ -109,8 +110,10 @@ class Lottery:
 
         while True:
             numbers = self._backend(len_, max_) if (len_ and max_) else None
+
             if numbers is not None:
                 print('extras: ', *numbers, end='\r', flush=True)
+
             yield numbers
 
     def __call__(self,
