@@ -183,4 +183,4 @@ if __name__ == '__main__':
     print('Estraendo...')
     print(superenalotto(backend=args.backend, many=args.many),
           f'Estrazione ripetuta {superenalotto._stop} volte',
-          f'Backend: {args.backend}', sep='\n')
+          f'Backend: {args.backend}', sep='\n', flush=True)
