@@ -4,7 +4,8 @@ from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Iterable, Iterator, Literal, Optional, Self
+from typing import Any, Iterable, Literal, Optional, Self
+
 from joblib import Parallel, delayed
 
 rnd = SystemRandom()
@@ -96,46 +97,35 @@ class Lottery:
 
         return numbers[grab]
 
-    def main_drawer(self, len_: int, max_: int) -> Iterator[Iterable[int]]:
+    def one_draw(self, len_: int, max_: int) -> Iterable[int] | None:
+        return self._backend(len_, max_) if (len_ and max_) else None
 
-        while True:
-            numbers = self._backend(len_, max_)
-            print('numbers: ', *numbers, end='\r', flush=True)
-
-            yield numbers
-
-    def extra_drawer(self, len_: int, max_: int) -> Iterator[Iterable[int] | None]:
-
-        while True:
-            numbers = self._backend(len_, max_) if (len_ and max_) else None
-
-            if numbers is not None:
-                print('extras: ', *numbers, end='\r', flush=True)
-
-            yield numbers
-
-    def __call__(self,
-                 backend: Literal['choice', 'randint',
-                                  'sample', 'shuffle'],
-                 many: Optional[int] = None,
-                 ) -> Self:
+    def drawer(self, len_: int, max_: int) -> Any:
         '''
         To add further randomness, it simulates several extractions
         among 1 and <many> times, and picks one casually. Hopefully,
         the winning one :D
         '''
+        parallel = Parallel(return_as='generator_unordered', prefer='threads')
+        draws = parallel(delayed(self.one_draw)(len_, max_)
+                         for _ in range(self._stop))
+
+        return draws
+
+    def __call__(self,
+                 backend: Literal['choice', 'randint', 'sample', 'shuffle'],
+                 many: Optional[int] = None,
+                 ) -> Self:
+
         self.backend = backend
         self._stop = rnd.randint(1, many or 1)
 
         extractions = zip(
-            self.main_drawer(self.len_draw, self.max_numbers),
-            self.extra_drawer(self.len_extra, self.max_extra)
+            self.drawer(self.len_draw, self.max_numbers),
+            self.drawer(self.len_extra, self.max_extra)
         )
 
-        extraction = next(
-            islice(extractions, self._stop, self._stop+1)
-        )
-
+        extraction = next(islice(extractions, self._stop-1, self._stop))
         self.extraction = Extraction(*extraction)
 
         return self
