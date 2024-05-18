@@ -5,6 +5,7 @@ from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
 from typing import Iterable, Iterator, Literal, Optional, Self
+from joblib import Parallel, delayed
 
 rnd = SystemRandom()
 
@@ -16,7 +17,6 @@ class Extraction:
 
 
 class Lottery:
-
     def __init__(self,
                  max_numbers: int = 90,
                  len_draw: int = 6,
@@ -28,7 +28,7 @@ class Lottery:
         self.max_extra = max_extra or 0
         self.len_draw = len_draw
         self.len_extra = len_extra or 0
-        self._stop = 1
+        self._stop = 0
 
     @property
     def backend(self):
@@ -96,17 +96,15 @@ class Lottery:
 
         return numbers[grab]
 
-    def main_drawer(self, len_: int, max_: int,
-                    ) -> Iterator[Iterable[int]]:
+    def main_drawer(self, len_: int, max_: int) -> Iterator[Iterable[int]]:
 
         while True:
             numbers = self._backend(len_, max_)
             print('numbers: ', *numbers, end='\r', flush=True)
-            
+
             yield numbers
 
-    def extra_drawer(self, len_: int, max_: int,
-                     ) -> Iterator[Iterable[int] | None]:
+    def extra_drawer(self, len_: int, max_: int) -> Iterator[Iterable[int] | None]:
 
         while True:
             numbers = self._backend(len_, max_) if (len_ and max_) else None
@@ -119,7 +117,8 @@ class Lottery:
     def __call__(self,
                  backend: Literal['choice', 'randint',
                                   'sample', 'shuffle'],
-                 many: Optional[int] = None) -> Self:
+                 many: Optional[int] = None,
+                 ) -> Self:
         '''
         To add further randomness, it simulates several extractions
         among 1 and <many> times, and picks one casually. Hopefully,
@@ -186,4 +185,4 @@ if __name__ == '__main__':
     print('Estraendo...')
     print(superenalotto(backend=args.backend, many=args.many),
           f'Estrazione ripetuta {superenalotto._stop} volte',
-          f'Backend: {args.backend}', sep='\n', flush=True)
+          f'Backend: {superenalotto.backend}', sep='\n', flush=True)
