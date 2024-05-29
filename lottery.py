@@ -140,7 +140,6 @@ class Lottery:
             extra = f'Superstar: {extra}'
 
             return f'{draw}\n{extra}'
-
         else:
             return f'{draw}'
 
@@ -154,7 +153,7 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--backend', action='store', default='sample', type=str,
                         choices=('shuffle', 'sample', 'randint', 'choice'),
                         help='select the desired backend to draw numbers')
-    parser.add_argument('-m', '--many', action='store', default=10_000, type=int,
+    parser.add_argument('-m', '--many', action='store', default=100_000, type=int,
                         help='''select how many times to draw before randomly 
                         choose one extraction''')
     parser.add_argument('-n', '--numbers', action='store', default=90, type=int,
