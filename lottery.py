@@ -18,6 +18,15 @@ class Extraction:
 
 
 class Lottery:
+    __slots__ = (
+        'max_numbers',
+        'max_extra',
+        'len_draw',
+        'len_extra',
+        '_stop',
+        'extraction',
+        '_backend')
+
     def __init__(self,
                  max_numbers: int = 90,
                  len_draw: int = 6,
