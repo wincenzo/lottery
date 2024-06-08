@@ -11,7 +11,7 @@ from joblib import Parallel, delayed
 rnd = SystemRandom()
 
 
-@dataclass
+@dataclass(slots=True)
 class Extraction:
     draw: Iterable[int]
     extra: Optional[Iterable[int]]
