@@ -25,7 +25,8 @@ class Lottery:
         'len_extra',
         '_stop',
         'extraction',
-        '_backend')
+        '_backend'
+    )
 
     def __init__(self,
                  max_numbers: int = 90,
