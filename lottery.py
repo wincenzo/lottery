@@ -172,7 +172,7 @@ if __name__ == '__main__':
                         help='select upper limit for extras')
     parser.add_argument('--lenum', action='store', default=6, type=int,
                         help='select how many numbers to draw')
-    parser.add_argument('--lenex', action='store', default=None, type=int,
+    parser.add_argument('--lenex', action='store', default=1, type=int,
                         help='select how many extra numbers to draw')
 
     args = parser.parse_args()
