@@ -160,6 +160,7 @@ class Lottery:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    
     parser.add_argument('-b', '--backend', action='store', default='sample', type=str,
                         choices=('shuffle', 'sample', 'randint', 'choice'),
                         help='select the desired backend to draw numbers')
