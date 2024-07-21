@@ -19,26 +19,26 @@ class Extraction:
 
 class Lottery:
     __slots__ = (
-        'max_numbers',
-        'max_extra',
-        'len_draw',
-        'len_extra',
+        '_maxnumbers',
+        '_maxextra',
+        '_lendraw',
+        '_lenextra',
         '_stop',
         'extraction',
         '_backend'
     )
 
     def __init__(self,
-                 max_numbers: int = 90,
-                 len_draw: int = 6,
-                 max_extra: Optional[int] = None,
-                 len_extra: Optional[int] = None,
+                 _maxnumbers: int = 90,
+                 _lendraw: int = 6,
+                 _maxextra: Optional[int] = None,
+                 _lenextra: Optional[int] = None,
                  ) -> None:
 
-        self.max_numbers = max_numbers
-        self.max_extra = max_extra or 0
-        self.len_draw = len_draw
-        self.len_extra = len_extra or 0
+        self._maxnumbers = _maxnumbers
+        self._maxextra = _maxextra or 0
+        self._lendraw = _lendraw
+        self._lenextra = _lenextra or 0
         self._stop = 0
 
     @property
@@ -64,20 +64,20 @@ class Lottery:
         return self._backend.__name__
 
     @staticmethod
-    def choice(len_: int, max_: int) -> tuple[int, ...]:
-        numbers = list(range(1, max_+1))
+    def choice(_len: int, _max: int) -> tuple[int, ...]:
+        numbers = list(range(1, _max+1))
 
         def draw():
             number = rnd.choice(numbers)
             numbers.remove(number)
             return number
 
-        return tuple(starmap(draw, repeat((), len_)))
+        return tuple(starmap(draw, repeat((), _len)))
 
     @staticmethod
-    def sample(len_: int, max_: int) -> tuple[int, ...]:
-        indexes = itemgetter(*rnd.sample(range(90), k=len_))
-        numbers = indexes(range(1, max_+1))
+    def sample(_len: int, _max: int) -> tuple[int, ...]:
+        indexes = itemgetter(*rnd.sample(range(90), k=_len))
+        numbers = indexes(range(1, _max+1))
 
         if isinstance(numbers, tuple):
             return numbers
@@ -85,39 +85,39 @@ class Lottery:
             return numbers,
 
     @staticmethod
-    def randint(len_: int, max_: int) -> set[int]:
-        draw = iter(lambda: rnd.randint(1, max_), None)
+    def randint(_len: int, _max: int) -> set[int]:
+        draw = iter(lambda: rnd.randint(1, _max), None)
 
         extraction = set()
-        while len_ - len(extraction):
+        while _len - len(extraction):
             extraction.add(next(draw))
 
         return extraction
 
     @staticmethod
-    def shuffle(len_: int, max_: int) -> list[int]:
-        numbers = list(range(1, max_+1))
+    def shuffle(_len: int, _max: int) -> list[int]:
+        numbers = list(range(1, _max+1))
         rnd.shuffle(numbers)
 
-        start = rnd.randint(0, max_-len_)
-        max_step = (max_ - start) // len_
-        step = rnd.randint(1, max_step)
-        stop = start + len_ * step
+        start = rnd.randint(0, _max-_len)
+        _maxstep = (_max - start) // _len
+        step = rnd.randint(1, _maxstep)
+        stop = start + _len * step
         grab = slice(start, stop, step)
 
         return numbers[grab]
 
-    def one_draw(self, len_: int, max_: int) -> Iterable[int] | None:
-        return self._backend(len_, max_) if (len_ and max_) else None
+    def one_draw(self, _len: int, _max: int) -> Iterable[int] | None:
+        return self._backend(_len, _max) if (_len and _max) else None
 
-    def drawer(self, len_: int, max_: int) -> Any:
+    def drawer(self, _len: int, _max: int) -> Any:
         '''
         To add further randomness, it simulates several extractions
         among 1 and <many> times, and picks one casually. Hopefully,
         the winning one :D
         '''
         parallel = Parallel(return_as='generator_unordered', prefer='threads', n_jobs=-1)
-        draws = parallel(delayed(self.one_draw)(len_, max_)
+        draws = parallel(delayed(self.one_draw)(_len, _max)
                          for _ in range(self._stop))
 
         return draws
@@ -131,8 +131,8 @@ class Lottery:
         self._stop = rnd.randint(1, many or 1)
 
         extractions = zip(
-            self.drawer(self.len_draw, self.max_numbers),
-            self.drawer(self.len_extra, self.max_extra)
+            self.drawer(self._lendraw, self._maxnumbers),
+            self.drawer(self._lenextra, self._maxextra)
         )
 
         extraction = next(islice(extractions, self._stop-1, self._stop))
@@ -154,8 +154,8 @@ class Lottery:
             return f'{draw}'
 
     def __repr__(self) -> str:
-        return (f'Lottery(max_numbers={self.max_numbers}, max_extra={self.max_extra},'
-                f' len_draw={self.len_draw}, len_extra={self.len_extra})')
+        return (f'Lottery(_maxnumbers={self._maxnumbers}, _maxextra={self._maxextra},'
+                f' _lendraw={self._lendraw}, _lenextra={self._lenextra})')
 
 
 if __name__ == '__main__':
@@ -179,8 +179,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     superenalotto = Lottery(
-        max_numbers=args.numbers, len_draw=args.lenum,
-        max_extra=args.extras, len_extra=args.lenex)
+        _maxnumbers=args.numbers, _lendraw=args.lenum,
+        _maxextra=args.extras, _lenextra=args.lenex)
 
     print('Estraendo...')
     print(superenalotto(backend=args.backend, many=args.many),
