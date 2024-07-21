@@ -19,26 +19,26 @@ class Extraction:
 
 class Lottery:
     __slots__ = (
-        '_maxnumbers',
-        '_maxextra',
-        '_lendraw',
-        '_lenextra',
+        'max_numbers',
+        'max_extra',
+        'len_draw',
+        'len_extra',
         '_stop',
         'extraction',
-        '_backend'
+        '_backend',
     )
 
     def __init__(self,
-                 _maxnumbers: int = 90,
-                 _lendraw: int = 6,
-                 _maxextra: Optional[int] = None,
-                 _lenextra: Optional[int] = None,
+                 max_numbers: int = 90,
+                 len_draw: int = 6,
+                 max_extra: Optional[int] = None,
+                 len_extra: Optional[int] = None,
                  ) -> None:
 
-        self._maxnumbers = _maxnumbers
-        self._maxextra = _maxextra or 0
-        self._lendraw = _lendraw
-        self._lenextra = _lenextra or 0
+        self.max_numbers = max_numbers
+        self.max_extra = max_extra or 0
+        self.len_draw = len_draw
+        self.len_extra = len_extra or 0
         self._stop = 0
 
     @property
@@ -131,8 +131,8 @@ class Lottery:
         self._stop = rnd.randint(1, many or 1)
 
         extractions = zip(
-            self.drawer(self._lendraw, self._maxnumbers),
-            self.drawer(self._lenextra, self._maxextra)
+            self.drawer(self.len_draw, self.max_numbers),
+            self.drawer(self.len_extra, self.max_extra)
         )
 
         extraction = next(islice(extractions, self._stop-1, self._stop))
@@ -154,8 +154,8 @@ class Lottery:
             return f'{draw}'
 
     def __repr__(self) -> str:
-        return (f'Lottery(_maxnumbers={self._maxnumbers}, _maxextra={self._maxextra},'
-                f' _lendraw={self._lendraw}, _lenextra={self._lenextra})')
+        return (f'Lottery(max_numbers={self.max_numbers}, max_extra={self.max_extra},'
+                f' len_draw={self.len_draw}, len_extra={self.len_extra})')
 
 
 if __name__ == '__main__':
@@ -179,8 +179,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     superenalotto = Lottery(
-        _maxnumbers=args.numbers, _lendraw=args.lenum,
-        _maxextra=args.extras, _lenextra=args.lenex)
+        max_numbers=args.numbers, len_draw=args.lenum,
+        max_extra=args.extras, len_extra=args.lenex)
 
     print('Estraendo...')
     print(superenalotto(backend=args.backend, many=args.many),
