@@ -116,7 +116,7 @@ class Lottery:
         among 1 and <many> times, and picks one casually. Hopefully,
         the winning one :D
         '''
-        parallel = Parallel(return_as='generator_unordered', prefer='threads')
+        parallel = Parallel(return_as='generator_unordered', prefer='threads', n_jobs=-1)
         draws = parallel(delayed(self.one_draw)(len_, max_)
                          for _ in range(self._stop))
 
@@ -161,7 +161,7 @@ class Lottery:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('-b', '--backend', action='store', default='sample', type=str,
+    parser.add_argument('-b', '--backend', action='store', default=None, type=str,
                         choices=('shuffle', 'sample', 'randint', 'choice'),
                         help='select the desired backend to draw numbers')
     parser.add_argument('-m', '--many', action='store', default=100_000, type=int,
