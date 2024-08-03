@@ -125,7 +125,7 @@ class Lottery:
                 self.one_draw)(_len, _max) for _ in range(self._stop)
         )
 
-        return draws
+        return next(islice(draws, self._stop-1, None))
 
     def __call__(self,
                  backend: Literal['choice', 'randint', 'sample', 'shuffle'],
@@ -135,10 +135,8 @@ class Lottery:
         self.backend = backend
         self._stop = rnd.randint(1, many or 1)
 
-        draw = next(
-            islice(self.drawer(self.len_draw, self.max_numbers), self._stop-1, None))
-        extra = next(
-            islice(self.drawer(self.len_extra, self.max_extra), self._stop-1, None))
+        draw = self.drawer(self.len_draw, self.max_numbers)
+        extra = self.drawer(self.len_extra, self.max_extra)
 
         self.extraction = Extraction(draw, extra)
 
