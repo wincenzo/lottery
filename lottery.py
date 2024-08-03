@@ -137,7 +137,6 @@ class Lottery:
 
         draw = self.drawer(self.len_draw, self.max_numbers)
         extra = self.drawer(self.len_extra, self.max_extra)
-
         self.extraction = Extraction(draw, extra)
 
         return self
