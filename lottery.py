@@ -4,7 +4,7 @@ from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Iterable, Iterator, Literal, Optional, Self
+from typing import Any, Iterable, Literal, Optional, Self
 
 from joblib import Parallel, delayed
 
@@ -112,7 +112,7 @@ class Lottery:
     def one_draw(self, _len: int, _max: int) -> Iterable[int] | None:
         return self._backend(_len, _max) if (_len and _max) else None
 
-    def drawer(self, _len: int, _max: int) -> Iterator | list:
+    def drawer(self, _len: int, _max: int) -> Any:
         '''
         To add further randomness, it simulates several extractions
         among 1 and <many> times, and picks one casually. Hopefully,
@@ -135,13 +135,12 @@ class Lottery:
         self.backend = backend
         self._stop = rnd.randint(1, many or 1)
 
-        extractions = zip(
-            self.drawer(self.len_draw, self.max_numbers),
-            self.drawer(self.len_extra, self.max_extra)
-        )
+        draw = next(
+            islice(self.drawer(self.len_draw, self.max_numbers), self._stop-1, None))
+        extra = next(
+            islice(self.drawer(self.len_extra, self.max_extra), self._stop-1, None))
 
-        extraction = next(islice(extractions, self._stop-1))
-        self.extraction = Extraction(*extraction)
+        self.extraction = Extraction(draw, extra)
 
         return self
 
