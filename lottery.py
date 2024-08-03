@@ -72,8 +72,7 @@ class Lottery:
         def draw():
             nonlocal _max
             indexes = range(_max)
-            idx = rnd.choice(indexes)
-            number = numbers.pop(idx)
+            number = numbers.pop(rnd.choice(indexes))
             _max -= 1
             return number
 
