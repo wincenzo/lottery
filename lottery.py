@@ -39,7 +39,9 @@ class Lottery:
         self.max_extra = max_extra or 0
         self.len_draw = len_draw
         self.len_extra = len_extra or 0
-        self._stop = 0
+
+        self._stop: int
+        self.extraction: Extraction
 
     @property
     def backend(self):
