@@ -4,7 +4,7 @@ from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Any, Iterable, Literal, Optional, Self
+from typing import Iterable, Iterator, Literal, Optional, Self
 
 from joblib import Parallel, delayed
 
@@ -110,15 +110,18 @@ class Lottery:
     def one_draw(self, _len: int, _max: int) -> Iterable[int] | None:
         return self._backend(_len, _max) if (_len and _max) else None
 
-    def drawer(self, _len: int, _max: int) -> Any:
+    def drawer(self, _len: int, _max: int) -> Iterator | list:
         '''
         To add further randomness, it simulates several extractions
         among 1 and <many> times, and picks one casually. Hopefully,
         the winning one :D
         '''
-        parallel = Parallel(return_as='generator_unordered', prefer='threads', n_jobs=-1)
-        draws = parallel(delayed(self.one_draw)(_len, _max)
-                         for _ in range(self._stop))
+        parallel = Parallel(return_as='generator_unordered',
+                            prefer='threads', n_jobs=-1)
+        draws = parallel(
+            delayed(
+                self.one_draw)(_len, _max) for _ in range(self._stop)
+        )
 
         return draws
 
@@ -135,7 +138,7 @@ class Lottery:
             self.drawer(self.len_extra, self.max_extra)
         )
 
-        extraction = next(islice(extractions, self._stop-1, self._stop))
+        extraction = next(islice(extractions, self._stop-1))
         self.extraction = Extraction(*extraction)
 
         return self
@@ -160,11 +163,11 @@ class Lottery:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    
+
     parser.add_argument('-b', '--backend', action='store', default=None, type=str,
                         choices=('shuffle', 'sample', 'randint', 'choice'),
                         help='select the desired backend to draw numbers')
-    parser.add_argument('-m', '--many', action='store', default=100_000, type=int,
+    parser.add_argument('-m', '--many', action='store', default=500_000, type=int,
                         help='''select how many times to draw before randomly 
                         choose one extraction''')
     parser.add_argument('-n', '--numbers', action='store', default=90, type=int,
