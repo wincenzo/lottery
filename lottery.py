@@ -70,10 +70,8 @@ class Lottery:
         numbers = list(range(1, _max+1))
 
         def draw():
-            nonlocal _max
-            indexes = range(_max)
-            number = numbers.pop(rnd.choice(indexes))
-            _max -= 1
+            number = rnd.choice(numbers)
+            numbers.remove(number)
             return number
 
         return tuple(starmap(draw, repeat((), _len)))
