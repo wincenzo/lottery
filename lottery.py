@@ -184,7 +184,7 @@ if __name__ == '__main__':
         max_numbers=args.numbers, len_draw=args.lenum,
         max_extra=args.extras, len_extra=args.lenex)
 
-    print('Estraendo...')
+    print(f'{datetime.now():%x %X} - Estraendo...')
     print(superenalotto(backend=args.backend, many=args.many),
           f'Estrazione ripetuta {superenalotto._stop} volte',
           sep='\n', flush=True)
