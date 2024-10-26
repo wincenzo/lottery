@@ -165,19 +165,19 @@ if __name__ == '__main__':
                         help='''select how many times to draw before randomly 
                         choose one extraction''')
     parser.add_argument('-n', '--numbers', action='store', default=90, type=int,
-                        help='select upper linit for numbers')
+                        help='select upper limit for numbers')
     parser.add_argument('-e', '--extras', action='store', default=90, type=int,
                         help='select upper limit for extras')
-    parser.add_argument('--lenum', action='store', default=6, type=int,
+    parser.add_argument('--nsize', action='store', default=6, type=int,
                         help='select how many numbers to draw')
-    parser.add_argument('--lenex', action='store', default=0, type=int,
+    parser.add_argument('--esize', action='store', default=0, type=int,
                         help='select how many extra numbers to draw')
 
     args = parser.parse_args()
 
     superenalotto = Lottery(
-        max_number=args.numbers, draw_size=args.lenum,
-        max_extra=args.extras, extra_size=args.lenex)
+        max_number=args.numbers, draw_size=args.nsize,
+        max_extra=args.extras, extra_size=args.esize)
 
     print('Estraendo...')
     print(superenalotto(backend=args.backend, many=args.many),
