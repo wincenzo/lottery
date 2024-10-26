@@ -2,14 +2,10 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
-from itertools import islice, repeat, starmap
+from itertools import repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
 from typing import Any, Iterable, Literal, Optional, Self
-
-from joblib import Parallel, delayed
-
-# rnd = SystemRandom()
 
 
 @dataclass(slots=True)
