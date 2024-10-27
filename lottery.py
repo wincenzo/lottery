@@ -38,16 +38,15 @@ class Lottery:
         self.max_extra = max_extra or 0
         self.draw_size = draw_size
         self.extra_size = extra_size or 0
-
-        self._iterations: int
-        self.extraction: Extraction
+        self._iterations: int = 0
+        self.extraction: Extraction = Extraction([], None)
 
     @property
     def backend(self):
         return self._backend
 
     @backend.setter
-    def backend(self, name):
+    def backend(self, name: str):
         match name:
             case 'choice':
                 self._backend = self.choice
@@ -183,7 +182,3 @@ if __name__ == '__main__':
     print(superenalotto(backend=args.backend, many=args.many),
           f'Estrazione ripetuta {superenalotto._iterations} volte',
           sep='\n', flush=True)
-    
-    
-
-    
