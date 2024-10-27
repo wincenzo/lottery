@@ -112,7 +112,7 @@ class Lottery:
         return numbers[grab]
 
     def draw_once(self, size: int, max_num: int) -> Iterable[int] | None:
-        return self._backend(size, max_num) if (size and max_num) else None
+        return self._backend(size, max_num) if all((size, max_num)) else None
 
     def drawer(self, count: int, max_num: int) -> Any:
         """
@@ -121,7 +121,7 @@ class Lottery:
         with ThreadPoolExecutor() as executor:
             futures = (executor.submit(self.draw_once, count, max_num)
                        for _ in range(self._iterations))
-            draws = tuple(future.result() for future in as_completed(futures))
+            draws = [future.result() for future in as_completed(futures)]
 
         return draws[-1]
 
@@ -183,3 +183,7 @@ if __name__ == '__main__':
     print(superenalotto(backend=args.backend, many=args.many),
           f'Estrazione ripetuta {superenalotto._iterations} volte',
           sep='\n', flush=True)
+    
+    
+
+    
