@@ -10,7 +10,7 @@ from typing import Any, Iterable, Literal, Optional, Self
 
 @dataclass(slots=True)
 class Extraction:
-    draw: Iterable[int]
+    draw: Iterable[int] 
     extra: Optional[Iterable[int]]
 
 
@@ -110,10 +110,10 @@ class Lottery:
 
         return numbers[grab]
 
-    def draw_once(self, size: int, max_num: int) -> Iterable[int] | None:
-        return self._backend(size, max_num) if all((size, max_num)) else None
+    def draw_once(self, size: int, max_num: int) -> Iterable[int]:
+        return self._backend(size, max_num) if all((size, max_num)) else ()
 
-    def drawer(self, count: int, max_num: int) -> Any:
+    def drawer(self, count: int, max_num: int) -> Iterable[int]:
         """
         Adds randomness by simulating multiple draws and selecting one.
         """
