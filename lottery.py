@@ -115,10 +115,10 @@ class Lottery:
 
     def drawer(self, count: int, max_num: int) -> Any:
         """
-        Adds randomness by simulating multiple draws and randomly selecting one.
+        Adds randomness by simulating multiple draws and selecting one.
         """
         with ThreadPoolExecutor() as executor:
-            futures = (executor.submit(self.draw_once, count, max_num)
+            futures = (executor.submit(self.draw_once, count, max_num) 
                        for _ in range(self._iterations))
             draws = [future.result() for future in as_completed(futures)]
 
