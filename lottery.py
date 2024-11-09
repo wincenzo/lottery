@@ -5,12 +5,12 @@ from datetime import datetime
 from itertools import repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Any, Iterable, Literal, Optional, Self
+from typing import Iterable, Literal, Optional, Self
 
 
 @dataclass(slots=True)
 class Extraction:
-    draw: Iterable[int] 
+    draw: Iterable[int]
     extra: Optional[Iterable[int]]
 
 
@@ -118,7 +118,7 @@ class Lottery:
         Adds randomness by simulating multiple draws and selecting one.
         """
         with ThreadPoolExecutor() as executor:
-            futures = (executor.submit(self.draw_once, count, max_num) 
+            futures = (executor.submit(self.draw_once, count, max_num)
                        for _ in range(self._iterations))
             draws = [future.result() for future in as_completed(futures)]
 
