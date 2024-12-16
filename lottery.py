@@ -120,9 +120,9 @@ class Lottery:
         with ThreadPoolExecutor() as executor:
             futures = (executor.submit(self.draw_once, count, max_num)
                        for _ in range(self._iterations))
-            draws = [future.result() for future in as_completed(futures)]
+            draw = [future.result() for future in as_completed(futures)][-1]
 
-        return draws[-1]
+        return draw
 
     def __call__(self,
                  backend: Literal['choice', 'randint', 'sample', 'shuffle'],
