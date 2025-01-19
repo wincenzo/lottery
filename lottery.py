@@ -1,4 +1,5 @@
 import argparse
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
@@ -191,9 +192,16 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    superenalotto = Lottery(
-        max_number=args.numbers, draw_size=args.nsize,
-        max_extra=args.extras, extra_size=args.esize
-    )
+    try:
+        superenalotto = Lottery(
+            max_number=args.numbers, draw_size=args.nsize,
+            max_extra=args.extras, extra_size=args.esize
+        )
 
-    print(superenalotto(backend=args.backend, many=args.many))
+        print(superenalotto(backend=args.backend, many=args.many))
+    except KeyboardInterrupt:
+        print('\n! MANUALLY STOPPED !')
+        sys.exit(1)
+
+
+    
