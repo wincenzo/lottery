@@ -175,9 +175,6 @@ class Lottery:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-b', '--backend', action='store', default=None, type=str,
-                        choices=('shuffle', 'sample', 'randint', 'choice'),
-                        help='select the desired backend to draw numbers')
     parser.add_argument('-m', '--many', action='store', default=100_000, type=int,
                         help='''select how many times to draw before randomly 
                         choose one extraction''')
