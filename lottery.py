@@ -1,8 +1,8 @@
 import argparse
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
-from itertools import repeat, starmap
+from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
 from typing import Iterable, Literal, Optional, Self
@@ -117,7 +117,7 @@ class Lottery:
 
     def drawer(self, count: int, max_num: int) -> Iterable[int]:
         """
-        Adds randomness by simulating multiple draws and selecting last one.
+        Adds randomness by simulating multiple draws and selecting one.
         """
         with ThreadPoolExecutor() as executor:
             futures = [
@@ -129,7 +129,10 @@ class Lottery:
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
 
-        return [future.result() for future in as_completed(futures)][-1]
+        # Get the last future's result
+        draw = next(islice(futures, self._iterations-1, None))
+
+        return draw.result()
 
     def __call__(self,
                  backend: Literal['choice', 'randint', 'sample', 'shuffle'],
