@@ -199,6 +199,7 @@ if __name__ == '__main__':
         )
 
         print(superenalotto(backend=args.backend, many=args.many))
+        
     except KeyboardInterrupt:
         print('\n! MANUALLY STOPPED !')
         sys.exit(1)
