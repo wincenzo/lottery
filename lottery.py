@@ -139,10 +139,9 @@ class Lottery:
         self.backend = backend
         self._iterations = Lottery.rnd.randint(1, many or 1)
 
-        print(
-            f"\nTotale estrazioni: {self._iterations:,}",
-            f"Backend: {self.backend}",
-            sep="\n", end="\n")
+        print(f"\nTotale estrazioni: {self._iterations:,}",
+              f"Backend: {self.backend}",
+              sep="\n", end="\n")
 
         draw = self.drawer(self.draw_size, self.max_number)
         if self.extra_size:
