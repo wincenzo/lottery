@@ -7,6 +7,8 @@ from operator import itemgetter
 from random import SystemRandom
 from typing import Iterable, Literal, Optional, Self
 
+from tqdm import tqdm
+
 
 @dataclass(slots=True)
 class Extraction:
@@ -115,14 +117,19 @@ class Lottery:
 
     def drawer(self, count: int, max_num: int) -> Iterable[int]:
         """
-        Adds randomness by simulating multiple draws and selecting one.
+        Adds randomness by simulating multiple draws and selecting last one.
         """
         with ThreadPoolExecutor() as executor:
-            futures = (executor.submit(self.draw_once, count, max_num)
-                       for _ in range(self._iterations))
-            draw = [future.result() for future in as_completed(futures)][-1]
+            futures = [
+                executor.submit(self.draw_once, count, max_num)
+                for _ in tqdm(range(self._iterations),
+                              desc="Estraendo ...",
+                              unit="draws",
+                              ncols=80,
+                              bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
+            ]
 
-        return draw
+        return [future.result() for future in as_completed(futures)][-1]
 
     def __call__(self,
                  backend: Literal['choice', 'randint', 'sample', 'shuffle'],
@@ -132,8 +139,16 @@ class Lottery:
         self.backend = backend
         self._iterations = Lottery.rnd.randint(1, many or 1)
 
+        print(
+            f"\nTotale estrazioni: {self._iterations:,}",
+            f"Backend: {self.backend}",
+            sep="\n", end="\n")
+
         draw = self.drawer(self.draw_size, self.max_number)
-        extra = self.drawer(self.extra_size, self.max_extra)
+        if self.extra_size:
+            extra = self.drawer(self.extra_size, self.max_extra)
+        else:
+            extra = None
         self.extraction = Extraction(draw, extra)
 
         return self
@@ -141,7 +156,7 @@ class Lottery:
     def __str__(self) -> str:
         now = datetime.now()
         draw = ' '.join(map(str, sorted(self.extraction.draw)))
-        result = f'Estrazione del {now:%x %X}\nNumeri estratti: {draw}'
+        result = f'\nEstrazione del {now:%x %X}\nNumeri estratti: {draw}\n'
 
         if self.extraction.extra:
             extra = ' '.join(map(str, sorted(self.extraction.extra)))
@@ -178,7 +193,4 @@ if __name__ == '__main__':
         max_number=args.numbers, draw_size=args.nsize,
         max_extra=args.extras, extra_size=args.esize)
 
-    print('Estraendo...')
-    print(superenalotto(backend=args.backend, many=args.many),
-          f'Estrazione ripetuta {superenalotto._iterations} volte',
-          sep='\n', flush=True)
+    print(superenalotto(backend=args.backend, many=args.many))
