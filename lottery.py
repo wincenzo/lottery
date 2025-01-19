@@ -190,6 +190,7 @@ if __name__ == '__main__':
 
     superenalotto = Lottery(
         max_number=args.numbers, draw_size=args.nsize,
-        max_extra=args.extras, extra_size=args.esize)
+        max_extra=args.extras, extra_size=args.esize
+    )
 
     print(superenalotto(backend=args.backend, many=args.many))
