@@ -49,7 +49,7 @@ class Lottery:
         return self._backend
 
     @backend.setter
-    def backend(self, name: str):
+    def backend(self, name: Optional[str]):
         match name:
             case 'choice':
                 self._backend = self.choice
@@ -136,7 +136,7 @@ class Lottery:
         return draw.result()
 
     def __call__(self,
-                 backend: Literal['choice', 'randint', 'sample', 'shuffle'],
+                 backend: Optional[Literal['choice', 'randint', 'sample', 'shuffle']],
                  many: Optional[int] = None,
                  ) -> Self:
 
@@ -198,7 +198,10 @@ if __name__ == '__main__':
             max_extra=args.extras, extra_size=args.esize
         )
 
-        print(superenalotto(backend=args.backend, many=args.many))
+        backend = input(
+            'Inserisci il backend (choice, randint, sample, shuffle): ') or None
+    
+        print(superenalotto(backend=backend, many=args.many)) # type: ignore
         
     except KeyboardInterrupt:
         print('\n! MANUALLY STOPPED !')
