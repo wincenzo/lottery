@@ -196,7 +196,7 @@ if __name__ == '__main__':
         )
 
         backend = input(
-            'Inserisci il backend (choice, randint, sample, shuffle): ') or None
+            'Scegli il backend (choice, randint, sample, shuffle): ') or None
     
         print(superenalotto(backend=backend, many=args.many)) # type: ignore
         
