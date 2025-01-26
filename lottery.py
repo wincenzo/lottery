@@ -150,17 +150,17 @@ class Lottery:
         draw = self.drawer(self.draw_size, self.max_number)
         extra = self.drawer(self.extra_size, self.max_extra) if self.extra_size else None
 
-        self.extraction = Extraction(draw, extra)
+        self.extraction = Extraction(sorted(draw), sorted(extra or []))
 
         return self
 
     def __str__(self) -> str:
         now = datetime.now()
-        draw = ' '.join(map(str, sorted(self.extraction.draw)))
+        draw = ' '.join(map(str, self.extraction.draw))
         result = f'\nEstrazione del {now:%x %X}\nNumeri estratti: {draw}'
 
         if self.extraction.extra:
-            extra = ' '.join(map(str, sorted(self.extraction.extra)))
+            extra = ' '.join(map(str, self.extraction.extra))
             result += f'\nSuperstar: {extra}'
 
         return result
