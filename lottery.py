@@ -37,9 +37,9 @@ class Lottery:
                  extra_size: Optional[int] = None,
                  ) -> None:
 
-        self.max_number = max_number
+        self.max_number = max_number or 90
         self.max_extra = max_extra or 0
-        self.draw_size = draw_size
+        self.draw_size = draw_size or 6
         self.extra_size = extra_size or 0
         self._iterations: int = 0
         self.extraction: Extraction = Extraction([], None)
@@ -118,7 +118,7 @@ class Lottery:
 
     def drawer(self, count: int, max_num: int) -> Iterable[int]:
         """
-        Adds randomness by simulating multiple draws and selecting one.
+        Adds randomness by simulating multiple draws and grabbing last one.
         """
         with ThreadPoolExecutor() as executor:
             futures = [
@@ -148,10 +148,8 @@ class Lottery:
               sep="\n", end="\n")
 
         draw = self.drawer(self.draw_size, self.max_number)
-        if self.extra_size:
-            extra = self.drawer(self.extra_size, self.max_extra)
-        else:
-            extra = None
+        extra = self.drawer(self.extra_size, self.max_extra) if self.extra_size else None
+
         self.extraction = Extraction(draw, extra)
 
         return self
@@ -159,7 +157,7 @@ class Lottery:
     def __str__(self) -> str:
         now = datetime.now()
         draw = ' '.join(map(str, sorted(self.extraction.draw)))
-        result = f'\nEstrazione del {now:%x %X}\nNumeri estratti: {draw}\n'
+        result = f'\nEstrazione del {now:%x %X}\nNumeri estratti: {draw}'
 
         if self.extraction.extra:
             extra = ' '.join(map(str, sorted(self.extraction.extra)))
@@ -197,12 +195,9 @@ if __name__ == '__main__':
 
         backend = input(
             'Scegli il backend (choice, randint, sample, shuffle): ') or None
-    
-        print(superenalotto(backend=backend, many=args.many)) # type: ignore
-        
+
+        print(superenalotto(backend=backend, many=args.many))  # type: ignore
+
     except KeyboardInterrupt:
         print('\n! MANUALLY STOPPED !')
         sys.exit(1)
-
-
-    
