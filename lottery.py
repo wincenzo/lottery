@@ -105,7 +105,7 @@ class Lottery:
         numbers = list(range(1, max_num+1))
         Lottery.rnd.shuffle(numbers)
 
-        start = Lottery.rnd.randint(0, max_num - size)
+        start = Lottery.rnd.randint(0, max_num-size)
         max_numstep = (max_num - start) // size
         step = Lottery.rnd.randint(1, max_numstep)
         stop = start + size * step
