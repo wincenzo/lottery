@@ -116,13 +116,13 @@ class Lottery:
     def draw_once(self, size: int, max_num: int) -> Iterable[int]:
         return self._backend(size, max_num) if all((size, max_num)) else ()
 
-    def drawer(self, count: int, max_num: int) -> Iterable[int]:
+    def drawer(self, size: int, max_num: int) -> Iterable[int]:
         """
         Adds randomness by simulating multiple draws and grabbing last one.
         """
         with ThreadPoolExecutor() as executor:
             futures = [
-                executor.submit(self.draw_once, count, max_num)
+                executor.submit(self.draw_once, size, max_num)
                 for _ in tqdm(range(self._iterations),
                               desc="Estraendo ...",
                               unit="draws",
