@@ -52,22 +52,12 @@ class Lottery:
 
     @backend.setter
     def backend(self, name: str):
-        name = (name if name in self.backends
-                else Lottery.rnd.sample(self.backends, 1)[-1])
-
         match name:
-            case 'choice':
-                self._backend = self.choice
-            case 'randint':
-                self._backend = self.randint
-            case 'sample':
-                self._backend = self.sample
-            case 'shuffle':
-                self._backend = self.shuffle
+            case _ if name in self.backends:
+                self._backend = getattr(self, name)
             case _:
-                raise ValueError('not a valid backend')
-
-        self.backend.name = name
+                _name = Lottery.rnd.sample(self.backends, 1)[-1]
+                self._backend = getattr(self, _name)
 
     @staticmethod
     def choice(size: int, max_num: int) -> tuple[int, ...]:
@@ -148,7 +138,7 @@ class Lottery:
         self.extraction = Extraction(sorted(draw), sorted(extra or []))
 
         print(f"Totale estrazioni: {self._iterations:,}",
-              f"Backend: {self.backend.name}",
+              f"Backend: {self.backend.__name__}",  # type: ignore
               sep="\n", end="\n")
 
         return self
@@ -193,9 +183,9 @@ if __name__ == '__main__':
         )
 
         backend = input(
-            'Scegli il backend (choice, randint, sample, shuffle): ') 
+            'Scegli il backend (choice, randint, sample, shuffle): ')
 
-        print(superenalotto(backend=backend, many=args.many))  
+        print(superenalotto(backend=backend, many=args.many))
 
     except KeyboardInterrupt:
         print('\n--- MANUALLY STOPPED ---')
