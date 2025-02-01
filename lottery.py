@@ -202,5 +202,5 @@ if __name__ == '__main__':
         print(superenalotto(backend=backend, many=args.many))  # type: ignore
 
     except KeyboardInterrupt:
-        print('\n! MANUALLY STOPPED !')
+        print('\n--- MANUALLY STOPPED ---')
         sys.exit(1)
