@@ -6,7 +6,7 @@ from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Iterable, Literal, Optional, Self
+from typing import Iterable, Optional, Self
 
 from tqdm import tqdm
 
@@ -52,7 +52,7 @@ class Lottery:
 
     @backend.setter
     def backend(self, name: str):
-        name = (name if name in self.backends 
+        name = (name if name in self.backends
                 else Lottery.rnd.sample(self.backends, 1)[-1])
 
         match name:
