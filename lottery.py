@@ -25,6 +25,7 @@ class Lottery:
         'extra_size',
         '_iterations',
         'extraction',
+        'backends',
         '_backend',
     )
 
@@ -43,28 +44,30 @@ class Lottery:
         self.extra_size = extra_size or 0
         self._iterations: int = 0
         self.extraction: Extraction = Extraction([], None)
+        self.backends = ('choice', 'randint', 'sample', 'shuffle')
 
     @property
     def backend(self):
         return self._backend
 
     @backend.setter
-    def backend(self, name: Optional[str]):
+    def backend(self, name: str):
+        name = (name if name in self.backends 
+                else Lottery.rnd.sample(self.backends, 1)[-1])
+
         match name:
             case 'choice':
                 self._backend = self.choice
             case 'randint':
                 self._backend = self.randint
-            case 'sample' | None:
+            case 'sample':
                 self._backend = self.sample
             case 'shuffle':
                 self._backend = self.shuffle
             case _:
                 raise ValueError('not a valid backend')
 
-    @backend.getter
-    def backend(self):
-        return self._backend.__name__
+        self.backend.name = name
 
     @staticmethod
     def choice(size: int, max_num: int) -> tuple[int, ...]:
@@ -114,7 +117,7 @@ class Lottery:
         return numbers[grab]
 
     def draw_once(self, size: int, max_num: int) -> Iterable[int]:
-        return self._backend(size, max_num) if all((size, max_num)) else ()
+        return self.backend(size, max_num) if all((size, max_num)) else ()
 
     def drawer(self, size: int, max_num: int) -> Iterable[int]:
         """
@@ -130,27 +133,27 @@ class Lottery:
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
 
-        # Get the last future's result
         draw = next(islice(futures, self._iterations-1, None))
 
         return draw.result()
 
     def __call__(self,
-                 backend: Optional[Literal['choice', 'randint', 'sample', 'shuffle']],
+                 backend: str,
                  many: Optional[int] = None,
                  ) -> Self:
 
         self.backend = backend
         self._iterations = Lottery.rnd.randint(1, many or 1)
 
-        print(f"\nTotale estrazioni: {self._iterations:,}",
-              f"Backend: {self.backend}",
-              sep="\n", end="\n")
-
         draw = self.drawer(self.draw_size, self.max_number)
-        extra = self.drawer(self.extra_size, self.max_extra) if self.extra_size else None
+        extra = self.drawer(
+            self.extra_size, self.max_extra) if self.extra_size else None
 
         self.extraction = Extraction(sorted(draw), sorted(extra or []))
+
+        print(f"Totale estrazioni: {self._iterations:,}",
+              f"Backend: {self.backend.name}",
+              sep="\n", end="\n")
 
         return self
 
