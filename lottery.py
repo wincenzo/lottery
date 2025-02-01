@@ -1,6 +1,6 @@
 import argparse
 import sys
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import datetime
 from itertools import islice, repeat, starmap
@@ -133,15 +133,11 @@ class Lottery:
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
 
-        draw = next(islice(futures, self._iterations-1, None))
+        draw = next(islice(as_completed(futures), self._iterations-1, None))
 
         return draw.result()
 
-    def __call__(self,
-                 backend: str,
-                 many: Optional[int] = None,
-                 ) -> Self:
-
+    def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.backend = backend
         self._iterations = Lottery.rnd.randint(1, many or 1)
 
@@ -197,9 +193,9 @@ if __name__ == '__main__':
         )
 
         backend = input(
-            'Scegli il backend (choice, randint, sample, shuffle): ') or None
+            'Scegli il backend (choice, randint, sample, shuffle): ') 
 
-        print(superenalotto(backend=backend, many=args.many))  # type: ignore
+        print(superenalotto(backend=backend, many=args.many))  
 
     except KeyboardInterrupt:
         print('\n--- MANUALLY STOPPED ---')
