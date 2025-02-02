@@ -56,8 +56,8 @@ class Lottery:
             case _ if name in self.backends:
                 self._backend = getattr(self, name)
             case _:
-                _name = Lottery.rnd.sample(self.backends, 1)[-1]
-                self._backend = getattr(self, _name)
+                name = Lottery.rnd.sample(self.backends, 1)[-1]
+                self._backend = getattr(self, name)
 
     @staticmethod
     def choice(size: int, max_num: int) -> tuple[int, ...]:
