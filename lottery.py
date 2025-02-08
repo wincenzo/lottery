@@ -131,9 +131,9 @@ class Lottery:
 
         draw = self.drawer(self.draw_size, self.max_number)
         extra = self.drawer(
-            self.extra_size, self.max_extra) if self.extra_size else None
+            self.extra_size, self.max_extra) if self.extra_size else []
 
-        self.extraction = Extraction(sorted(draw), sorted(extra or []))
+        self.extraction = Extraction(sorted(draw), sorted(extra))
 
         print(f"Totale estrazioni: {self._iterations:,}",
               f"Backend: {self.backend.__name__}",
