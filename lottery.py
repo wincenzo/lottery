@@ -6,7 +6,7 @@ from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Iterable, Optional, Self
+from typing import Callable, Iterable, Optional, Self
 
 from tqdm import tqdm
 
@@ -25,7 +25,6 @@ class Lottery:
         'extra_size',
         '_iterations',
         'extraction',
-        'backends',
         '_backend',
     )
 
@@ -44,20 +43,17 @@ class Lottery:
         self.extra_size = extra_size or 0
         self._iterations: int = 0
         self.extraction: Extraction = Extraction([], None)
-        self.backends = ('choice', 'randint', 'sample', 'shuffle')
 
     @property
-    def backend(self):
+    def backend(self) -> Callable[[int, int], Iterable[int]]:
         return self._backend
 
     @backend.setter
-    def backend(self, name: str):
-        match name:
-            case _ if name in self.backends:
-                self._backend = getattr(self, name)
-            case _:
-                name = Lottery.rnd.sample(self.backends, 1)[-1]
-                self._backend = getattr(self, name)
+    def backend(self, name: str) -> None:
+        default_name = Lottery.rnd.sample(
+            ('choice', 'randint', 'sample', 'shuffle'), k=1)[0]
+        default_backend = getattr(self, default_name)
+        self._backend = getattr(self, name, default_backend)
 
     @staticmethod
     def choice(size: int, max_num: int) -> tuple[int, ...]:
@@ -138,7 +134,7 @@ class Lottery:
         self.extraction = Extraction(sorted(draw), sorted(extra or []))
 
         print(f"Totale estrazioni: {self._iterations:,}",
-              f"Backend: {self.backend.__name__}",  # type: ignore
+              f"Backend: {self.backend.__name__}",
               sep="\n", end="\n")
 
         return self
