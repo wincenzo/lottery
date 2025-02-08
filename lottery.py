@@ -84,8 +84,10 @@ class Lottery:
         draw = iter(lambda: Lottery.rnd.randint(1, max_num), None)
 
         extraction = set()
-        while len(extraction) < size:
+        while True:
             extraction.add(next(draw))
+            if len(extraction) == size:
+                break
 
         return extraction
 
