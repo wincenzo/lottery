@@ -6,7 +6,7 @@ from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Callable, Iterable, Optional, Self
+from typing import Callable, Iterable, Optional, Self, Iterator
 
 from tqdm import tqdm
 
@@ -115,7 +115,7 @@ class Lottery:
             futures = [
                 executor.submit(self.draw_once, size, max_num)
                 for _ in tqdm(range(self._iterations),
-                              desc="Estraendo ...",
+                              desc=f"Backend: {self.backend.__name__} ...",
                               unit="draws",
                               ncols=80,
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
@@ -134,10 +134,6 @@ class Lottery:
             self.extra_size, self.max_extra) if self.extra_size else []
 
         self.extraction = Extraction(sorted(draw), sorted(extra))
-
-        print(f"Totale estrazioni: {self._iterations:,}",
-              f"Backend: {self.backend.__name__}",
-              sep="\n", end="\n")
 
         return self
 
