@@ -6,7 +6,7 @@ from datetime import datetime
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import Callable, Iterable, Optional, Self, Iterator
+from typing import Callable, Iterable, Optional, Self
 
 from tqdm import tqdm
 
