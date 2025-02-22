@@ -52,8 +52,8 @@ class Lottery:
     def backend(self, name: str) -> None:
         default_name, = Lottery.rnd.sample(
             ('choice', 'randint', 'sample', 'shuffle'), k=1)
-        backend = getattr(self, default_name)
-        self._backend = getattr(self, name, backend)
+        default_backend = getattr(self, default_name)
+        self._backend = getattr(self, name, default_backend)
 
     @staticmethod
     def choice(size: int, max_num: int) -> tuple[int, ...]:
