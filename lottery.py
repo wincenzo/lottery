@@ -48,7 +48,7 @@ class Lottery:
 
     @property
     def default_backend(self) -> DrawMethod:
-        bcknd, = self.rnd.sample(self.BACKENDS, k=1)
+        bcknd = self.rnd.sample(self.BACKENDS, k=1)[0]
         return getattr(self, bcknd)
 
     @property
