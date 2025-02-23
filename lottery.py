@@ -3,7 +3,6 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
-from functools import cached_property
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
@@ -47,7 +46,7 @@ class Lottery:
         self._iters: int = 0
         self.result: Extraction = Extraction((), None)
 
-    @cached_property
+    @property
     def default_backend(self) -> DrawMethod:
         bcknd, = self.rnd.sample(self.BACKENDS, k=1)
         return getattr(self, bcknd)
