@@ -3,6 +3,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
+from functools import cached_property
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
@@ -27,6 +28,7 @@ class Lottery:
         'result',
         '_iters',
         '_backend',
+        '__dict__',
     )
 
     rnd = SystemRandom()
@@ -45,7 +47,7 @@ class Lottery:
         self._iters: int = 0
         self.result: Extraction = Extraction((), None)
 
-    @property
+    @cached_property
     def default_backend(self) -> DrawMethod:
         bcknd, = self.rnd.sample(self.BACKENDS, k=1)
         return getattr(self, bcknd)
@@ -122,10 +124,10 @@ class Lottery:
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
 
-        draw = next(islice(as_completed(futures), self._iters-1, None))
+            draw = next(islice(as_completed(futures), self._iters-1, None))
 
-        return draw.result()
-    
+            return draw.result()
+
     @contextmanager
     def drawing_session(self):
         """
@@ -134,12 +136,12 @@ class Lottery:
         draw = self.drawer(self.draw_sz, self.max_num)
         extra = self.drawer(self.xtr_sz, self.max_ext) if self.xtr_sz else ()
         results = Extraction(draw, extra)
-        
+
         try:
             yield results
-            
+
         finally:
-            del draw, extra
+            del draw, extra#
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.backend = backend
