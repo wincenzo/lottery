@@ -1,7 +1,6 @@
 import argparse
-import asyncio
 import sys
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
 from itertools import islice, repeat, starmap
@@ -25,10 +24,9 @@ class Lottery:
         'max_ext',
         'draw_sz',
         'xtr_sz',
-        '_iters',
         'result',
-        '_method',
-        '__dict__',
+        '_iters',
+        '_backend',
     )
 
     rnd = SystemRandom()
@@ -48,39 +46,30 @@ class Lottery:
         self.result: Extraction = Extraction((), None)
 
     @property
-    def number_range(self) -> list[int]:
-        return list(range(1, self.max_num+1))
+    def default_backend(self) -> DrawMethod:
+        bcknd, = self.rnd.sample(self.BACKENDS, k=1)
+        return getattr(self, bcknd)
 
     @property
-    def default(self) -> DrawMethod:
-        def_bcknd, = self.rnd.sample(self.BACKENDS, k=1)
-        return getattr(self, def_bcknd)
+    def backend(self) -> DrawMethod:
+        return self._backend
 
-    @property
-    def method(self) -> DrawMethod:
-        return self._method
-
-    @method.setter
-    def method(self, name: str) -> None:
-        if not self.is_valid_backend(name):
-            self._method = self.default
+    @backend.setter
+    def backend(self, name: str) -> None:
+        if self.is_valid_backend(name):
+            self._backend = cast(DrawMethod, getattr(self, name))
         else:
-            self._method = cast(DrawMethod, getattr(self, name))
+            self._backend = self.default_backend
 
     @staticmethod
     def is_valid_backend(name: str) -> TypeGuard[str]:
         return name in Lottery.BACKENDS
 
-    @contextmanager
-    def drawing_session(self):
-        """Context manager for drawing session."""
-        try:
-            yield self
-        finally:
-            pass
+    def get_numbers(self, max_num) -> list[int]:
+        return list(range(1, max_num+1))
 
     def choice(self, size: int, max_num: int) -> tuple[int, ...]:
-        numbers = self.number_range
+        numbers = self.get_numbers(max_num)
 
         def draw():
             nonlocal max_num
@@ -93,7 +82,7 @@ class Lottery:
 
     def sample(self, size: int, max_num: int) -> tuple[int, ...]:
         indexes = itemgetter(*self.rnd.sample(range(max_num), k=size))
-        numbers = indexes(self.number_range)
+        numbers = indexes(self.get_numbers(max_num))
 
         return numbers if isinstance(numbers, tuple) else (numbers,)
 
@@ -109,48 +98,55 @@ class Lottery:
         return tuple(extraction)
 
     def shuffle(self, size: int, max_num: int) -> tuple[int, ...]:
-        numbers = self.number_range
+        numbers = self.get_numbers(max_num)
         self.rnd.shuffle(numbers)
-
-        start = Lottery.rnd.randint(0, max_num-size)
-        max_numstep = (max_num - start) // size
-        step = Lottery.rnd.randrange(1, max_numstep)
-        stop = start + size * step
-        grab = slice(start, stop, step)
+        grab = slice(None, size, None)
 
         return tuple(numbers[grab])
 
     def draw_once(self, size: int, max_num: int) -> tuple[int, ...]:
-        return self.method(size, max_num) if all((size, max_num)) else ()
+        return self.backend(size, max_num) if all((size, max_num)) else ()
 
     @validate_draw_params
-    async def drawer(self, size: int, max_num: int) -> tuple[int, ...]:
-        """Adds randomness by simulating multiple draws and grabbing last one."""
-        loop = asyncio.get_event_loop()
-
+    def drawer(self, size: int, max_num: int) -> tuple[int, ...]:
+        """
+        Adds randomness by simulating multiple draws and grabbing last one.
+        """
         with ThreadPoolExecutor() as executor:
             futures = [
-                loop.run_in_executor(executor, self.draw_once, size, max_num)
+                executor.submit(self.draw_once, size, max_num)
                 for _ in tqdm(range(self._iters),
-                              desc=f"Backend: {self.method.__name__}",
+                              desc=f"Backend: {self.backend.__name__} ...",
                               unit="draws",
                               ncols=80,
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
-        completed = await asyncio.gather(*futures)
 
-        return next(islice(completed, self._iters-1, None))
+        draw = next(islice(as_completed(futures), self._iters-1, None))
 
-    def __call__(self, method: str, many: Optional[int] = None) -> Self:
-        with self.drawing_session():
-            self.method = method
-            self._iters = many or self.rnd.randint(1, 100_000)
+        return draw.result()
+    
+    @contextmanager
+    def drawing_session(self):
+        """
+        Context manager for drawing session.
+        """
+        draw = self.drawer(self.draw_sz, self.max_num)
+        extra = self.drawer(self.xtr_sz, self.max_ext) if self.xtr_sz else ()
+        results = Extraction(draw, extra)
+        
+        try:
+            yield results
+            
+        finally:
+            del draw, extra
 
-            draw = asyncio.run(self.drawer(self.draw_sz, self.max_num))
-            extra = asyncio.run(
-                self.drawer(self.xtr_sz, self.max_ext)) if self.xtr_sz else ()
+    def __call__(self, backend: str, many: Optional[int] = None) -> Self:
+        self.backend = backend
+        self._iters = many or self.rnd.randint(1, 100_000)
 
-            self.result = Extraction(draw, extra)
+        with self.drawing_session() as results:
+            self.result = results
 
             return self
 
@@ -192,9 +188,9 @@ if __name__ == '__main__':
             max_ext=args.extras, xtr_sz=args.xtrsz
         )
 
-        method = input(
+        backend = input(
             'Scegli il backend (choice, randint, sample, shuffle): ')
-        print(superenalotto(method=method, many=args.many))
+        print(superenalotto(backend=backend, many=args.many))
 
     except KeyboardInterrupt:
         print('\n--- MANUALLY STOPPED ---')
