@@ -141,7 +141,7 @@ class Lottery:
             yield results
 
         finally:
-            del draw, extra#
+            del draw, extra
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.backend = backend
