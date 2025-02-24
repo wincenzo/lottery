@@ -3,6 +3,7 @@ import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
+from functools import cached_property
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
@@ -46,6 +47,10 @@ class Lottery:
         self._iters: int = 0
         self.result: Extraction = Extraction((), None)
 
+    @cached_property
+    def get_numbers(self) -> range:
+        return range(1, self.max_num+1)
+
     @property
     def default_backend(self) -> DrawMethod:
         bcknd = self.rnd.sample(self.BACKENDS, k=1)[0]
@@ -66,11 +71,8 @@ class Lottery:
     def is_valid_backend(name: str) -> TypeGuard[str]:
         return name in Lottery.BACKENDS
 
-    def get_numbers(self, max_num) -> list[int]:
-        return list(range(1, max_num+1))
-
     def choice(self, size: int, max_num: int) -> tuple[int, ...]:
-        numbers = self.get_numbers(max_num)
+        numbers = list(self.get_numbers)
 
         def draw():
             nonlocal max_num
@@ -83,7 +85,7 @@ class Lottery:
 
     def sample(self, size: int, max_num: int) -> tuple[int, ...]:
         indexes = itemgetter(*self.rnd.sample(range(max_num), k=size))
-        numbers = indexes(self.get_numbers(max_num))
+        numbers = indexes(self.get_numbers)
 
         return numbers if isinstance(numbers, tuple) else (numbers,)
 
@@ -98,8 +100,8 @@ class Lottery:
 
         return tuple(extraction)
 
-    def shuffle(self, size: int, max_num: int) -> tuple[int, ...]:
-        numbers = self.get_numbers(max_num)
+    def shuffle(self, size: int, *args) -> tuple[int, ...]:
+        numbers = list(self.get_numbers)
         self.rnd.shuffle(numbers)
         grab = slice(None, size, None)
 
@@ -123,7 +125,7 @@ class Lottery:
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
 
-            draw = next(islice(as_completed(futures), self._iters-1, None))
+            draw, = islice(as_completed(futures), self._iters-1, None)
 
             return draw.result()
 
@@ -191,6 +193,7 @@ if __name__ == '__main__':
 
         backend = input(
             'Scegli il backend (choice, randint, sample, shuffle): ')
+
         print(superenalotto(backend=backend, many=args.many))
 
     except KeyboardInterrupt:

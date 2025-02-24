@@ -4,6 +4,10 @@ from typing import Callable, Optional, Protocol
 
 
 def validate_draw_params(func) -> Callable:
+    '''
+    Decorator to validate draw parameters, to assure the size is within 
+    the range of 1 to max_num. This to avoid repetitions in the draw.
+    '''
     @wraps(func)
     def wrapper(self, size: int, max_num: int, *args, **kwargs):
         if not 0 < size <= max_num:
