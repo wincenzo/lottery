@@ -127,13 +127,15 @@ class Lottery:
         """
         Context manager for drawing session.
         """
-        draw = self.drawer(self.draw_sz, self.max_num)
-        extra = self.drawer(self.xtr_sz, self.max_ext) if self.xtr_sz else ()
-        results = Extraction(draw, extra)
-
         try:
+            draw = self.drawer(self.draw_sz, self.max_num)
+            extra = self.drawer(self.xtr_sz, self.max_ext) if self.xtr_sz else ()
+            results = Extraction(draw, extra)
             yield results
 
+        except Exception as e:
+            print(f'Error: {e}')
+            
         finally:
             del draw, extra
 
