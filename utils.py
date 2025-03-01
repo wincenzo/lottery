@@ -1,6 +1,12 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import wraps
 from typing import Callable, Optional, Protocol
+
+
+@dataclass(slots=True)
+class Extraction:
+    draw: tuple[int, ...]
+    extra: Optional[tuple[int, ...]] = field(default=None)
 
 
 def validate_draw_params(func) -> Callable:
@@ -22,9 +28,3 @@ class DrawMethod(Protocol):
 
     def __call__(self, size: int, max_num: int) -> tuple[int]:
         ...
-
-
-@dataclass(frozen=True, slots=True)
-class Extraction:
-    draw: tuple[int, ...]
-    extra: Optional[tuple[int, ...]] = None
