@@ -45,7 +45,7 @@ class Lottery:
         self.draw_sz = draw_sz or self.DEFAULT_DRAW_SIZE
         self.xtr_sz = xtr_sz or 0
         self._iters: int = 0
-        self.result: Extraction = Extraction((), None)
+        self.result: Extraction = Extraction(draw=())
 
     @cached_property
     def get_numbers(self) -> range:
@@ -129,22 +129,22 @@ class Lottery:
         """
         try:
             draw = self.drawer(self.draw_sz, self.max_num)
-            extra = self.drawer(self.xtr_sz, self.max_ext) if self.xtr_sz else ()
-            results = Extraction(draw, extra)
-            yield results
+            extra = self.drawer(
+                self.xtr_sz, self.max_ext) if self.xtr_sz else None
+            yield draw, extra
 
         except Exception as e:
             print(f'Error: {e}')
-            
+
         finally:
             del draw, extra
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.init_backend = backend
-        self._iters = many or self.rnd.randint(1, 100_000)
+        self._iters = many or self.rnd.randrange(1, 100_001)
 
         with self.drawing_session() as results:
-            self.result = results
+            self.result.draw, self.result.extra = results
 
             return self
 
