@@ -7,7 +7,7 @@ from functools import cached_property
 from itertools import islice, repeat, starmap
 from operator import itemgetter
 from random import SystemRandom
-from typing import ClassVar, Final, Optional, Self, TypeGuard, cast
+from typing import ClassVar, Final, Optional, Self
 
 from tqdm import tqdm
 
@@ -52,9 +52,8 @@ class Lottery:
         return range(1, self.max_num+1)
 
     @property
-    def default_backend(self) -> DrawMethod:
-        bcknd = self.rnd.sample(self.BACKENDS, k=1)[0]
-        return getattr(self, bcknd)
+    def random_backend(self) -> DrawMethod:
+        return getattr(self, self.rnd.sample(self.BACKENDS, k=1)[0])
 
     @property
     def backend(self) -> DrawMethod:
@@ -62,14 +61,7 @@ class Lottery:
 
     @backend.setter
     def backend(self, name: str) -> None:
-        if self.is_valid_backend(name):
-            self._backend = cast(DrawMethod, getattr(self, name))
-        else:
-            self._backend = self.default_backend
-
-    @staticmethod
-    def is_valid_backend(name: str) -> TypeGuard[str]:
-        return name in Lottery.BACKENDS
+        self._backend = getattr(self, name, self.random_backend)
 
     def choice(self, size: int, max_num: int) -> tuple[int, ...]:
         numbers = list(self.get_numbers)
@@ -108,6 +100,7 @@ class Lottery:
         return tuple(numbers[grab])
 
     def draw_once(self, size: int, max_num: int) -> tuple[int, ...]:
+        self.backend = self.init_backend
         return self.backend(size, max_num) if all((size, max_num)) else ()
 
     @validate_draw_params
@@ -119,7 +112,7 @@ class Lottery:
             futures = [
                 executor.submit(self.draw_once, size, max_num)
                 for _ in tqdm(range(self._iters),
-                              desc=f"Backend: {self.backend.__name__} ...",
+                              desc=f"Drawing ...",
                               unit="draws",
                               ncols=80,
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
@@ -145,7 +138,7 @@ class Lottery:
             del draw, extra
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
-        self.backend = backend
+        self.init_backend = backend
         self._iters = many or self.rnd.randint(1, 100_000)
 
         with self.drawing_session() as results:
