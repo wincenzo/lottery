@@ -1,4 +1,5 @@
 import argparse
+import random as rnd
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
@@ -6,19 +7,19 @@ from datetime import datetime
 from functools import cached_property
 from itertools import islice, repeat, starmap
 from operator import itemgetter
-from random import SystemRandom
 from typing import ClassVar, Final, Optional, Self
 
 from tqdm import tqdm
 
 from utils import DrawMethod, Extraction, validate_draw_params
 
+MAX_NUMBERS: Final = 90
+DEFAULT_DRAW_SIZE: Final = 6
+
 
 class Lottery:
     BACKENDS: ClassVar[tuple[str, ...]] = (
         'choice', 'randint', 'sample', 'shuffle')
-    MAX_NUMBERS: Final = 90
-    DEFAULT_DRAW_SIZE: Final = 6
 
     __slots__ = (
         'max_num',
@@ -31,8 +32,6 @@ class Lottery:
         '__dict__',
     )
 
-    rnd = SystemRandom()
-
     def __init__(self,
                  max_num: int = MAX_NUMBERS,
                  draw_sz: int = DEFAULT_DRAW_SIZE,
@@ -40,20 +39,16 @@ class Lottery:
                  xtr_sz: Optional[int] = None,
                  ) -> None:
 
-        self.max_num = max_num or self.MAX_NUMBERS
+        self.max_num = max_num or MAX_NUMBERS
         self.max_ext = max_ext or 0
-        self.draw_sz = draw_sz or self.DEFAULT_DRAW_SIZE
+        self.draw_sz = draw_sz or DEFAULT_DRAW_SIZE
         self.xtr_sz = xtr_sz or 0
         self._iters: int = 0
         self.result: Extraction = Extraction(draw=())
 
     @cached_property
-    def get_numbers(self) -> range:
+    def numbers(self) -> range:
         return range(1, self.max_num+1)
-
-    @property
-    def random_backend(self) -> DrawMethod:
-        return getattr(self, self.rnd.sample(self.BACKENDS, k=1)[0])
 
     @property
     def backend(self) -> DrawMethod:
@@ -61,28 +56,14 @@ class Lottery:
 
     @backend.setter
     def backend(self, name: str) -> None:
-        self._backend = getattr(self, name, self.random_backend)
+        self._backend = getattr(self, name, self.random_backend())
 
-    def choice(self, size: int, max_num: int) -> tuple[int, ...]:
-        numbers = list(self.get_numbers)
+    def random_backend(self) -> DrawMethod:
+        return getattr(self, rnd.sample(self.BACKENDS, k=1)[0])
 
-        def draw():
-            nonlocal max_num
-            idx = self.rnd.choice(range(max_num))
-            number = numbers.pop(idx)
-            max_num -= 1
-            return number
-
-        return tuple(starmap(draw, repeat((), size)))
-
-    def sample(self, size: int, max_num: int) -> tuple[int, ...]:
-        indexes = itemgetter(*self.rnd.sample(range(max_num), k=size))
-        numbers = indexes(self.get_numbers)
-
-        return numbers if isinstance(numbers, tuple) else (numbers,)
-
-    def randint(self, size: int, max_num: int) -> tuple[int, ...]:
-        draw = iter(lambda: self.rnd.randint(1, max_num), None)
+    @staticmethod
+    def randint(size: int, max_num: int) -> tuple[int, ...]:
+        draw = iter(lambda: rnd.randint(1, max_num), None)
 
         extraction = set()
         while True:
@@ -92,16 +73,34 @@ class Lottery:
 
         return tuple(extraction)
 
+    def choice(self, size: int, max_num: int) -> tuple[int, ...]:
+        numbers = list(self.numbers)
+
+        def draw():
+            nonlocal max_num
+            idx = rnd.choice(range(max_num))
+            number = numbers.pop(idx)
+            max_num -= 1
+            return number
+
+        return tuple(starmap(draw, repeat((), size)))
+
+    def sample(self, size: int, max_num: int) -> tuple[int, ...]:
+        indexes = itemgetter(*rnd.sample(range(max_num), k=size))
+        numbers = indexes(self.numbers)
+
+        return numbers if isinstance(numbers, tuple) else (numbers,)
+
     def shuffle(self, size: int, *args) -> tuple[int, ...]:
-        numbers = list(self.get_numbers)
-        self.rnd.shuffle(numbers)
+        numbers = list(self.numbers)
+        rnd.shuffle(numbers)
         grab = slice(None, size, None)
 
         return tuple(numbers[grab])
 
     def draw_once(self, size: int, max_num: int) -> tuple[int, ...]:
         self.backend = self.init_backend
-        return self.backend(size, max_num) if all((size, max_num)) else ()
+        return self.backend(size, max_num)
 
     @validate_draw_params
     def drawer(self, size: int, max_num: int) -> tuple[int, ...]:
@@ -129,8 +128,10 @@ class Lottery:
         """
         try:
             draw = self.drawer(self.draw_sz, self.max_num)
+            get_extra = all((self.xtr_sz, self.max_ext))
             extra = self.drawer(
-                self.xtr_sz, self.max_ext) if self.xtr_sz else None
+                self.xtr_sz, self.max_ext) if get_extra else self.result.extra
+
             yield draw, extra
 
         except Exception as e:
@@ -141,7 +142,7 @@ class Lottery:
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.init_backend = backend
-        self._iters = many or self.rnd.randrange(1, 100_001)
+        self._iters = many or rnd.randrange(1, 100_001)
 
         with self.drawing_session() as results:
             self.result.draw, self.result.extra = results
@@ -169,11 +170,11 @@ if __name__ == '__main__':
 
     parser.add_argument('-m', '--many', action='store', default=None, type=int,
                         help='select how many times to draw')
-    parser.add_argument('-n', '--numbers', action='store', default=90, type=int,
+    parser.add_argument('-n', '--numbers', action='store', default=MAX_NUMBERS, type=int,
                         help='select upper limit for numbers')
-    parser.add_argument('-e', '--extras', action='store', default=90, type=int,
+    parser.add_argument('-e', '--extras', action='store', default=MAX_NUMBERS, type=int,
                         help='select upper limit for extras')
-    parser.add_argument('--numsz', action='store', default=6, type=int,
+    parser.add_argument('--numsz', action='store', default=DEFAULT_DRAW_SIZE, type=int,
                         help='select how many numbers to draw')
     parser.add_argument('--xtrsz', action='store', default=0, type=int,
                         help='select how many extra numbers to draw')
