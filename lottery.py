@@ -57,7 +57,11 @@ class Lottery:
 
     @backend.setter
     def backend(self, name: str) -> None:
-        self._backend = getattr(self, name, self.random_backend())
+        match name:
+            case 'choice' | 'randint' | 'randrange' | 'sample' | 'shuffle':
+                self._backend = getattr(self, name)    
+            case _:
+                self._backend = self.random_backend()
 
     def random_backend(self) -> DrawMethod:
         return getattr(self, rnd.sample(self.BACKENDS, k=1)[0])
