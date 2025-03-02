@@ -26,5 +26,4 @@ def validate_draw_params(func) -> Callable:
 class DrawMethod(Protocol):
     __name__: str
 
-    def __call__(self, size: int, max_num: int) -> tuple[int]:
-        ...
+    def __call__(self, size: int, max_num: int) -> tuple[int]: ...
