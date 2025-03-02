@@ -78,12 +78,12 @@ class Lottery:
 
     @staticmethod
     def randrange(size: int, max_num: int) -> set[int]:
-        def number_gen():
+        def draw():
             for _ in repeat(None):
                 yield rnd.randrange(1, max_num+1)
 
         extraction = set()
-        for number in number_gen():
+        for number in draw():
             extraction.add(number)
             if len(extraction) == size:
                 break
