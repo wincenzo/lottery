@@ -39,10 +39,10 @@ class Lottery:
                  xtr_sz: Optional[int] = None,
                  ) -> None:
 
-        self.max_num = max_num or MAX_NUMBERS
-        self.max_ext = max_ext or 0
-        self.draw_sz = draw_sz or DEFAULT_DRAW_SIZE
-        self.xtr_sz = xtr_sz or 0
+        self.max_num: int = max_num or MAX_NUMBERS
+        self.max_ext: int = max_ext or 0
+        self.draw_sz: int = draw_sz or DEFAULT_DRAW_SIZE
+        self.xtr_sz: int = xtr_sz or 0
         self._iters: int = 0
         self.result: Extraction = Extraction(draw=())
 
@@ -105,7 +105,7 @@ class Lottery:
     @validate_draw_params
     def drawer(self, size: int, max_num: int) -> tuple[int, ...]:
         """
-        Adds randomness by simulating multiple draws and grabbing last one.
+        Adds randomness by simulating multiple draws.
         """
         with ThreadPoolExecutor() as executor:
             futures = [
@@ -123,9 +123,6 @@ class Lottery:
 
     @contextmanager
     def drawing_session(self):
-        """
-        Context manager for drawing session.
-        """
         try:
             draw = self.drawer(self.draw_sz, self.max_num)
             get_extra = all((self.xtr_sz, self.max_ext))
@@ -133,12 +130,16 @@ class Lottery:
                 self.xtr_sz, self.max_ext) if get_extra else self.result.extra
 
             yield draw, extra
-
         except Exception as e:
             print(f'Error: {e}')
-
+            raise
         finally:
-            del draw, extra
+            self._iters = 0
+
+            try:
+                del draw, extra
+            except UnboundLocalError:
+                pass
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.init_backend = backend
