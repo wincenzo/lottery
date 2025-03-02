@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import cached_property
 from itertools import islice, repeat, starmap
 from operator import itemgetter
-from typing import ClassVar, Final, Optional, Self
+from typing import ClassVar, Final, Iterable, Optional, Self
 
 from tqdm import tqdm
 
@@ -59,7 +59,7 @@ class Lottery:
     def backend(self, name: str) -> None:
         match name:
             case 'choice' | 'randint' | 'randrange' | 'sample' | 'shuffle':
-                self._backend = getattr(self, name)    
+                self._backend = getattr(self, name)
             case _:
                 self._backend = self.random_backend()
 
@@ -67,17 +67,17 @@ class Lottery:
         return getattr(self, rnd.sample(self.BACKENDS, k=1)[0])
 
     @staticmethod
-    def randint(size: int, max_num: int) -> tuple[int, ...]:
+    def randint(size: int, max_num: int) -> set[int]:
         draw = iter(lambda: rnd.randint(1, max_num), None)
 
         extraction = {next(draw)}
         while len(extraction) < size:
             extraction.add(next(draw))
 
-        return tuple(extraction)
+        return extraction
 
     @staticmethod
-    def randrange(size: int, max_num: int) -> tuple[int, ...]:
+    def randrange(size: int, max_num: int) -> set[int]:
         def number_gen():
             for _ in repeat(None):
                 yield rnd.randrange(1, max_num+1)
@@ -88,7 +88,7 @@ class Lottery:
             if len(extraction) == size:
                 break
 
-        return tuple(extraction)
+        return extraction
 
     def choice(self, size: int, max_num: int) -> tuple[int, ...]:
         numbers = list(self.numbers)
@@ -108,19 +108,19 @@ class Lottery:
 
         return numbers if isinstance(numbers, tuple) else (numbers,)
 
-    def shuffle(self, size: int, *args) -> tuple[int, ...]:
+    def shuffle(self, size: int, *args) -> list[int]:
         numbers = list(self.numbers)
         rnd.shuffle(numbers)
         grab = slice(None, size, None)
 
-        return tuple(numbers[grab])
+        return numbers[grab]
 
-    def draw_once(self, size: int, max_num: int) -> tuple[int, ...]:
+    def draw_once(self, size: int, max_num: int) -> Iterable[int]:
         self.backend = self.init_backend
         return self.backend(size, max_num)
 
     @validate_draw_params
-    def drawer(self, size: int, max_num: int) -> tuple[int, ...]:
+    def drawer(self, size: int, max_num: int) -> Iterable[int]:
         """
         Adds randomness by simulating multiple draws.
         """
