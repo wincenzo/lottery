@@ -15,11 +15,12 @@ from utils import DrawMethod, Extraction, validate_draw_params
 
 MAX_NUMBERS: Final = 90
 DEFAULT_DRAW_SIZE: Final = 6
+MAX_DRAW_ITERS: Final = 100_000
 
 
 class Lottery:
     BACKENDS: ClassVar[tuple[str, ...]] = (
-        'choice', 'randint', 'sample', 'shuffle')
+        'choice', 'randint', 'randrange', 'sample', 'shuffle')
 
     __slots__ = (
         'max_num',
@@ -65,9 +66,21 @@ class Lottery:
     def randint(size: int, max_num: int) -> tuple[int, ...]:
         draw = iter(lambda: rnd.randint(1, max_num), None)
 
-        extraction = set()
-        while True:
+        extraction = {next(draw)}
+        while len(extraction) < size:
             extraction.add(next(draw))
+
+        return tuple(extraction)
+
+    @staticmethod
+    def randrange(size: int, max_num: int) -> tuple[int, ...]:
+        def number_gen():
+            for _ in repeat(None):
+                yield rnd.randrange(1, max_num+1)
+
+        extraction = set()
+        for number in number_gen():
+            extraction.add(number)
             if len(extraction) == size:
                 break
 
@@ -143,7 +156,7 @@ class Lottery:
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.init_backend = backend
-        self._iters = many or rnd.randrange(1, 100_001)
+        self._iters = many or rnd.randint(1, MAX_DRAW_ITERS)
 
         with self.drawing_session() as results:
             self.result.draw, self.result.extra = results
@@ -189,7 +202,7 @@ if __name__ == '__main__':
         )
 
         backend = input(
-            'Scegli il backend (choice, randint, sample, shuffle): ')
+            'Scegli il backend (choice, randint, randrange, sample, shuffle): ')
 
         print(superenalotto(backend=backend, many=args.many))
 
