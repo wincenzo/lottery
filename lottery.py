@@ -145,7 +145,6 @@ class Lottery:
             get_extra = all((self.xtr_sz, self.max_ext))
             extra = self.drawer(
                 self.xtr_sz, self.max_ext) if get_extra else self.result.extra
-
             yield draw, extra
         except Exception as e:
             print(f'Error: {e}')
