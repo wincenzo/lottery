@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
 from functools import cached_property
-from itertools import islice, repeat, starmap
+from itertools import compress, repeat, starmap
 from operator import itemgetter
 from typing import ClassVar, Final, Iterable, Optional, Self
 
@@ -111,7 +111,9 @@ class Lottery:
     def shuffle(self, size: int, *args) -> list[int]:
         numbers = list(self.numbers)
         rnd.shuffle(numbers)
-        grab = slice(None, size, None)
+        start = rnd.randint(0, self.max_num-size)
+        stop = start + size
+        grab = slice(start, stop, None)
 
         return numbers[grab]
 
@@ -134,9 +136,15 @@ class Lottery:
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
 
-            draw, = islice(as_completed(futures), self._iters-1, None)
+            def selections(length): return [
+                1 if rnd.random() > 0.5 else 0 for _ in range(length)]
 
-            return draw.result()
+            draws = [f.result() for f in as_completed(futures)]
+
+            while (length := len(draws)) >= 10:
+                draws = tuple(compress(draws, selections(length)))
+
+            return draws[-1]
 
     @contextmanager
     def drawing_session(self):
