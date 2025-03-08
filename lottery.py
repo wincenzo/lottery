@@ -137,8 +137,8 @@ class Lottery:
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
 
-            def selections(length: int) -> Iterator[int]: return (
-                1 if rnd.random() > 0.5 else 0 for _ in range(length))
+            def selections(length: int) -> Iterator[int]: 
+                yield from (1 if rnd.random() > 0.5 else 0 for _ in range(length))
 
             draws = [f.result() for f in as_completed(futures)]
 
