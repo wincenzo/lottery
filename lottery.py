@@ -7,7 +7,7 @@ from datetime import datetime
 from functools import cached_property
 from itertools import compress, repeat, starmap
 from operator import itemgetter
-from typing import ClassVar, Final, Iterable, Optional, Self
+from typing import ClassVar, Final, Iterable, Iterator, Optional, Self
 
 from tqdm import tqdm
 
@@ -78,7 +78,7 @@ class Lottery:
 
     @staticmethod
     def randrange(size: int, max_num: int) -> set[int]:
-        def draw():
+        def draw() -> Iterator[int]:
             for _ in repeat(None):
                 yield rnd.randrange(1, max_num+1)
 
@@ -136,15 +136,15 @@ class Lottery:
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
 
-            def selections(length): return [
-                1 if rnd.random() > 0.5 else 0 for _ in range(length)]
+            def selections(length: int) -> Iterator[int]: return (
+                1 if rnd.random() > 0.5 else 0 for _ in range(length))
 
             draws = [f.result() for f in as_completed(futures)]
 
             while (length := len(draws)) >= 10:
                 draws = tuple(compress(draws, selections(length)))
 
-            return draws[-1]
+            return rnd.choice(draws)
 
     @contextmanager
     def drawing_session(self):
