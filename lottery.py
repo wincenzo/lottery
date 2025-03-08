@@ -64,7 +64,7 @@ class Lottery:
                 self._backend = self.random_backend()
 
     def random_backend(self) -> DrawMethod:
-        return getattr(self, rnd.sample(self.BACKENDS, k=1)[0])
+        return getattr(self, rnd.choice(self.BACKENDS))
 
     @staticmethod
     def randint(size: int, max_num: int) -> set[int]:
@@ -131,8 +131,8 @@ class Lottery:
             futures = [
                 executor.submit(self.draw_once, size, max_num)
                 for _ in tqdm(range(self._iters),
-                              desc=f"Drawing ...",
-                              unit="draws",
+                              desc=f"Estraendo ...",
+                              unit="estrazioni",
                               ncols=80,
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
