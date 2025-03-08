@@ -119,6 +119,7 @@ class Lottery:
 
     def draw_once(self, size: int, max_num: int) -> Iterable[int]:
         self.backend = self.init_backend
+
         return self.backend(size, max_num)
 
     @validate_draw_params
