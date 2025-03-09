@@ -1,6 +1,10 @@
 import argparse
+import locale
 import random as rnd
 import sys
+
+locale.setlocale(locale.LC_ALL, locale='it_IT')
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
@@ -15,7 +19,6 @@ from utils import DrawMethod, Extraction, load_config, validate_draw_params
 
 CONFIGS: Final = load_config('config.toml')
 DEFAULTS: Final = CONFIGS['DEFAULTS']
-
 MAX_NUMBERS: Final = DEFAULTS.get('max_numbers', 90)
 DEFAULT_DRAW_SIZE: Final = DEFAULTS.get('default_draw_size', 6)
 MAX_DRAW_ITERS: Final = DEFAULTS.get('max_draw_iters', 100_000)
@@ -70,26 +73,26 @@ class Lottery:
         return getattr(self, rnd.choice(self.BACKENDS))
 
     @staticmethod
-    def randint(size: int, max_num: int) -> set[int]:
-        draw = iter(lambda: rnd.randint(1, max_num), None)
+    def randrange(size: int, max_num: int) -> set[int]:
+        draw = iter(lambda: rnd.randrange(1, max_num+1), None)
 
-        extraction = {next(draw)}
-        while len(extraction) < size:
-            extraction.add(next(draw))
+        extraction = set()
+        for number in draw:
+            extraction.add(number)
+            if len(extraction) == size:
+                break
 
         return extraction
 
     @staticmethod
-    def randrange(size: int, max_num: int) -> set[int]:
+    def randint(size: int, max_num: int) -> set[int]:
         def draw() -> Iterator[int]:
             for _ in repeat(None):
-                yield rnd.randrange(1, max_num+1)
+                yield rnd.randint(1, max_num)
 
-        extraction = set()
-        for number in draw():
-            extraction.add(number)
-            if len(extraction) == size:
-                break
+        extraction = {next(draw())}
+        while len(extraction) < size:
+            extraction.add(next(draw()))
 
         return extraction
 
