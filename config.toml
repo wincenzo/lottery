@@ -1,0 +1,4 @@
+[DEFAULTS]
+max_numbers = 90
+default_draw_size = 6
+max_draw_iters = 100_000

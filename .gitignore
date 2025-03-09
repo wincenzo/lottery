@@ -1,6 +1,7 @@
 *
 
 !utils.py
-!lottery.py 
+!lottery.py
+!config.toml 
 !README.md
 !.gitignore

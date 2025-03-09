@@ -1,6 +1,7 @@
 import argparse
 import random as rnd
 import sys
+import tomllib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
@@ -13,9 +14,13 @@ from tqdm import tqdm
 
 from utils import DrawMethod, Extraction, validate_draw_params
 
-MAX_NUMBERS: Final = 90
-DEFAULT_DRAW_SIZE: Final = 6
-MAX_DRAW_ITERS: Final = 100_000
+with open('config.toml', 'rb') as c:
+    configs = tomllib.load(c)
+    defaults = configs['DEFAULTS']
+
+    MAX_NUMBERS: Final = defaults['max_numbers']
+    DEFAULT_DRAW_SIZE: Final = defaults['default_draw_size']
+    MAX_DRAW_ITERS: Final = defaults['max_draw_iters']
 
 
 class Lottery:
@@ -137,7 +142,7 @@ class Lottery:
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
             ]
 
-            def selections(length: int) -> Iterator[int]: 
+            def selections(length: int) -> Iterator[int]:
                 yield from (1 if rnd.random() > 0.5 else 0 for _ in range(length))
 
             draws = [f.result() for f in as_completed(futures)]
