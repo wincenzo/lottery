@@ -1,7 +1,6 @@
 import argparse
 import random as rnd
 import sys
-import tomllib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
@@ -12,15 +11,14 @@ from typing import ClassVar, Final, Iterable, Iterator, Optional, Self
 
 from tqdm import tqdm
 
-from utils import DrawMethod, Extraction, validate_draw_params
+from utils import DrawMethod, Extraction, load_config, validate_draw_params
 
-with open('config.toml', 'rb') as c:
-    configs = tomllib.load(c)
-    defaults = configs['DEFAULTS']
+CONFIGS: Final = load_config('config.toml')
+DEFAULTS: Final = CONFIGS['DEFAULTS']
 
-    MAX_NUMBERS: Final = defaults['max_numbers']
-    DEFAULT_DRAW_SIZE: Final = defaults['default_draw_size']
-    MAX_DRAW_ITERS: Final = defaults['max_draw_iters']
+MAX_NUMBERS: Final = DEFAULTS['max_numbers']
+DEFAULT_DRAW_SIZE: Final = DEFAULTS['default_draw_size']
+MAX_DRAW_ITERS: Final = DEFAULTS['max_draw_iters']
 
 
 class Lottery:
@@ -45,9 +43,9 @@ class Lottery:
                  xtr_sz: Optional[int] = None,
                  ) -> None:
 
-        self.max_num: int = max_num or MAX_NUMBERS
+        self.max_num: int = max_num
         self.max_ext: int = max_ext or 0
-        self.draw_sz: int = draw_sz or DEFAULT_DRAW_SIZE
+        self.draw_sz: int = draw_sz
         self.xtr_sz: int = xtr_sz or 0
         self._iters: int = 0
         self.result: Extraction = Extraction(draw=())

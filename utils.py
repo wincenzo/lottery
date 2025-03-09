@@ -1,6 +1,8 @@
+import sys
+import tomllib
 from dataclasses import dataclass, field
 from functools import wraps
-from typing import Callable, Optional, Protocol
+from typing import Any, Callable, Iterable, Optional, Protocol
 
 
 @dataclass(slots=True)
@@ -24,6 +26,26 @@ def validate_draw_params(func) -> Callable:
 
 
 class DrawMethod(Protocol):
+    """
+    This protocol defines the interface for draw methods, which
+    should accept a size and max_num and return Iterable of int.
+    """
     __name__: str
 
-    def __call__(self, size: int, max_num: int) -> tuple[int]: ...
+    def __call__(self, size: int, max_num: int) -> Iterable[int]: ...
+
+
+def load_config(path: str) -> dict[str, Any]:
+    """
+    Load configuration from a TOML file.
+    """
+    try:
+        with open(path, 'rb') as c:
+            configs = tomllib.load(c)
+            return configs
+    except FileNotFoundError:
+        print("Configuration file not found.")
+        sys.exit(1)
+    except tomllib.TOMLDecodeError:
+        print("Error decoding the configuration file.")
+        sys.exit(1)
