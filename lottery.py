@@ -133,17 +133,18 @@ class Lottery:
         Adds randomness by simulating multiple draws.
         """
         with ThreadPoolExecutor() as executor:
-            futures = [
+            futures = (
                 executor.submit(self.draw_once, size, max_num)
                 for _ in tqdm(range(self._iters),
                               desc=f"Estraendo ...",
                               unit="estrazioni",
                               ncols=80,
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
-            ]
+            )
 
             def selections(length: int) -> Iterator[int]:
-                yield from (1 if rnd.random() > 0.5 else 0 for _ in range(length))
+                yield from (
+                    1 if rnd.random() > 0.5 else 0 for _ in repeat(None, length))
 
             draws = [f.result() for f in as_completed(futures)]
 
