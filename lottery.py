@@ -36,18 +36,18 @@ class Lottery:
     def __init__(self,
                  max_num: int = 90,
                  draw_sz: int = 6,
-                 max_ext: Optional[int] = None,
-                 xtr_sz: Optional[int] = None,
+                 max_ext: int = 90,
+                 xtr_sz: int = 1,
                  from_config: Optional[Path | str] = None
                  ) -> None:
 
-        if from_config:
-            self.config: Config = Config.load_config(from_config)
-        self.max_num: int = self.config.max_numbers or max_num
-        self.draw_sz: int = self.config.draw_size or draw_sz
-        self.max_ext: int = max_ext or 0
-        self.xtr_sz: int = xtr_sz or 0
-        self._iters: int = 0
+        self.CONFIG: Config = Config.load_config(
+            from_config) if from_config else Config()
+        self.max_num: int = self.CONFIG.max_numbers or max_num or 0
+        self.draw_sz: int = self.CONFIG.draw_size or draw_sz or 0
+        self.max_ext: int = self.CONFIG.max_ext or max_ext or 0
+        self.xtr_sz: int = self.CONFIG.xtr_sz or xtr_sz or 0
+        self._iters: int = 1
         self.result: Extraction = Extraction(draw=())
 
     @cached_property
@@ -171,7 +171,8 @@ class Lottery:
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.init_backend = backend
-        self._iters = many or rnd.randint(1, self.config.max_draw_iters or 1)
+        self._iters = many or rnd.randint(
+            1, self.CONFIG.max_draw_iters or self._iters)
 
         with self.drawing_session() as results:
             self.result.draw, self.result.extra = results
