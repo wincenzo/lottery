@@ -1,7 +1,7 @@
-import sys
 import tomllib
 from dataclasses import dataclass, field
 from functools import wraps
+from pathlib import Path
 from typing import Any, Callable, Iterable, Optional, Protocol
 
 
@@ -9,6 +9,31 @@ from typing import Any, Callable, Iterable, Optional, Protocol
 class Extraction:
     draw: tuple[int, ...]
     extra: Optional[tuple[int, ...]] = field(default=None)
+
+
+@dataclass(frozen=True)
+class Config:
+    """Configuration settings for lottery draws"""
+    max_numbers: int = field(default=90)
+    draw_size: int = field(default=6)
+    max_draw_iters: int = field(default=100_000)
+
+    @classmethod
+    def load_config(cls, path: Path | str) -> 'Config':
+        try:
+            with open(path, 'rb') as f:
+                config = tomllib.load(f)
+                return cls(
+                    max_numbers=config.get(
+                        'max_numbers', cls.max_numbers),
+                    draw_size=config.get(
+                        'default_draw_size', cls.draw_size),
+                    max_draw_iters=config.get(
+                        'max_draw_iters', cls.max_draw_iters)
+                )
+        except FileNotFoundError:
+            print(f"Config file {path} not found, using defaults")
+            return cls()
 
 
 def validate_draw_params(func) -> Callable:
@@ -33,19 +58,3 @@ class DrawMethod(Protocol):
     __name__: str
 
     def __call__(self, size: int, max_num: int) -> Iterable[int]: ...
-
-
-def load_config(path: str) -> dict[str, Any]:
-    """
-    Load configuration from a TOML file.
-    """
-    try:
-        with open(path, 'rb') as c:
-            configs = tomllib.load(c)
-            return configs
-    except FileNotFoundError:
-        print("Configuration file not found.")
-        sys.exit(1)
-    except tomllib.TOMLDecodeError:
-        print("Error decoding the configuration file.")
-        sys.exit(1)

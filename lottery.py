@@ -2,9 +2,6 @@ import argparse
 import locale
 import random as rnd
 import sys
-
-locale.setlocale(locale.LC_ALL, locale='it_IT')
-
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
@@ -15,12 +12,12 @@ from typing import ClassVar, Final, Iterable, Iterator, Optional, Self
 
 from tqdm import tqdm
 
-from utils import DrawMethod, Extraction, load_config, validate_draw_params
+from utils import Config, DrawMethod, Extraction, validate_draw_params
 
-CONFIGS: Final = load_config('config.toml')
-MAX_NUMBERS: Final = CONFIGS.get('max_numbers', 90)
-DEFAULT_DRAW_SIZE: Final = CONFIGS.get('default_draw_size', 6)
-MAX_DRAW_ITERS: Final = CONFIGS.get('max_draw_iters', 100_000)
+locale.setlocale(locale.LC_ALL, locale='it_IT')
+
+
+CONFIGS: Final = Config.load_config('config.toml')
 
 
 class Lottery:
@@ -39,8 +36,8 @@ class Lottery:
     )
 
     def __init__(self,
-                 max_num: int = MAX_NUMBERS,
-                 draw_sz: int = DEFAULT_DRAW_SIZE,
+                 max_num: int = CONFIGS.max_numbers,
+                 draw_sz: int = CONFIGS.draw_size,
                  max_ext: Optional[int] = None,
                  xtr_sz: Optional[int] = None,
                  ) -> None:
@@ -173,7 +170,7 @@ class Lottery:
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.init_backend = backend
-        self._iters = many or rnd.randint(1, MAX_DRAW_ITERS)
+        self._iters = many or rnd.randint(1, CONFIGS.max_draw_iters)
 
         with self.drawing_session() as results:
             self.result.draw, self.result.extra = results
@@ -201,11 +198,11 @@ if __name__ == '__main__':
 
     parser.add_argument('-m', '--many', action='store', default=None, type=int,
                         help='select how many times to draw')
-    parser.add_argument('-n', '--numbers', action='store', default=MAX_NUMBERS, type=int,
+    parser.add_argument('-n', '--numbers', action='store', default=CONFIGS.max_numbers, type=int,
                         help='select upper limit for numbers')
-    parser.add_argument('-e', '--extras', action='store', default=MAX_NUMBERS, type=int,
+    parser.add_argument('-e', '--extras', action='store', default=CONFIGS.max_numbers, type=int,
                         help='select upper limit for extras')
-    parser.add_argument('--numsz', action='store', default=DEFAULT_DRAW_SIZE, type=int,
+    parser.add_argument('--numsz', action='store', default=CONFIGS.draw_size, type=int,
                         help='select how many numbers to draw')
     parser.add_argument('--xtrsz', action='store', default=0, type=int,
                         help='select how many extra numbers to draw')
