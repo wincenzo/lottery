@@ -5,6 +5,20 @@ from pathlib import Path
 from typing import Callable, Iterable, Optional, Protocol
 
 
+def validate_draw_params(func) -> Callable:
+    '''
+    Decorator to validate draw parameters, to assure the size is within 
+    the range of 1 to max_num. This to avoid repetitions in the draw.
+    '''
+    @wraps(func)
+    def wrapper(self, size: int, max_num: int, *args, **kwargs):
+        if not 0 < size <= max_num:
+            raise ValueError(
+                f"Invalid draw parameters: size={size}, max_num={max_num}")
+        return func(self, size, max_num, *args, **kwargs)
+    return wrapper
+
+
 @dataclass(slots=True)
 class Extraction:
     draw: tuple[int, ...]
@@ -40,20 +54,6 @@ class Config:
         except FileNotFoundError:
             print(f"Config file {path} not found, using defaults")
             return cls()
-
-
-def validate_draw_params(func) -> Callable:
-    '''
-    Decorator to validate draw parameters, to assure the size is within 
-    the range of 1 to max_num. This to avoid repetitions in the draw.
-    '''
-    @wraps(func)
-    def wrapper(self, size: int, max_num: int, *args, **kwargs):
-        if not 0 < size <= max_num:
-            raise ValueError(
-                f"Invalid draw parameters: size={size}, max_num={max_num}")
-        return func(self, size, max_num, *args, **kwargs)
-    return wrapper
 
 
 class DrawMethod(Protocol):
