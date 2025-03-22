@@ -18,10 +18,9 @@ from tqdm import tqdm
 from utils import DrawMethod, Extraction, load_config, validate_draw_params
 
 CONFIGS: Final = load_config('config.toml')
-DEFAULTS: Final = CONFIGS['DEFAULTS']
-MAX_NUMBERS: Final = DEFAULTS.get('max_numbers', 90)
-DEFAULT_DRAW_SIZE: Final = DEFAULTS.get('default_draw_size', 6)
-MAX_DRAW_ITERS: Final = DEFAULTS.get('max_draw_iters', 100_000)
+MAX_NUMBERS: Final = CONFIGS.get('max_numbers', 90)
+DEFAULT_DRAW_SIZE: Final = CONFIGS.get('default_draw_size', 6)
+MAX_DRAW_ITERS: Final = CONFIGS.get('max_draw_iters', 100_000)
 
 
 class Lottery:
