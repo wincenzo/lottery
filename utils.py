@@ -51,8 +51,8 @@ class Config:
                     max_draw_iters=config.get(
                         'max_draw_iters', cls.max_draw_iters),
                 )
-        except FileNotFoundError:
-            print(f"Config file {path} not found, using defaults")
+        except (FileNotFoundError, tomllib.TOMLDecodeError) as e:
+            print(f"Config error: {e}, using defaults")
             return cls()
 
 
