@@ -8,16 +8,14 @@ from datetime import datetime
 from functools import cached_property
 from itertools import compress, repeat, starmap
 from operator import itemgetter
-from typing import ClassVar, Final, Iterable, Iterator, Optional, Self
+from pathlib import Path
+from typing import ClassVar, Iterable, Iterator, Optional, Self
 
 from tqdm import tqdm
 
 from utils import Config, DrawMethod, Extraction, validate_draw_params
 
 locale.setlocale(locale.LC_ALL, locale='it_IT')
-
-
-CONFIGS: Final = Config.load_config('config.toml')
 
 
 class Lottery:
@@ -36,15 +34,18 @@ class Lottery:
     )
 
     def __init__(self,
-                 max_num: int = CONFIGS.max_numbers,
-                 draw_sz: int = CONFIGS.draw_size,
+                 max_num: int = 90,
+                 draw_sz: int = 6,
                  max_ext: Optional[int] = None,
                  xtr_sz: Optional[int] = None,
+                 from_config: Optional[Path | str] = None
                  ) -> None:
 
-        self.max_num: int = max_num
+        if from_config:
+            self.config: Config = Config.load_config(from_config)
+        self.max_num: int = self.config.max_numbers or max_num
+        self.draw_sz: int = self.config.draw_size or draw_sz
         self.max_ext: int = max_ext or 0
-        self.draw_sz: int = draw_sz
         self.xtr_sz: int = xtr_sz or 0
         self._iters: int = 0
         self.result: Extraction = Extraction(draw=())
@@ -170,7 +171,7 @@ class Lottery:
 
     def __call__(self, backend: str, many: Optional[int] = None) -> Self:
         self.init_backend = backend
-        self._iters = many or rnd.randint(1, CONFIGS.max_draw_iters)
+        self._iters = many or rnd.randint(1, self.config.max_draw_iters or 1)
 
         with self.drawing_session() as results:
             self.result.draw, self.result.extra = results
@@ -198,21 +199,24 @@ if __name__ == '__main__':
 
     parser.add_argument('-m', '--many', action='store', default=None, type=int,
                         help='select how many times to draw')
-    parser.add_argument('-n', '--numbers', action='store', default=CONFIGS.max_numbers, type=int,
+    parser.add_argument('-n', '--numbers', action='store', type=int,
                         help='select upper limit for numbers')
-    parser.add_argument('-e', '--extras', action='store', default=CONFIGS.max_numbers, type=int,
+    parser.add_argument('-e', '--extras', action='store', type=int,
                         help='select upper limit for extras')
-    parser.add_argument('--numsz', action='store', default=CONFIGS.draw_size, type=int,
+    parser.add_argument('--numsz', action='store', type=int,
                         help='select how many numbers to draw')
     parser.add_argument('--xtrsz', action='store', default=0, type=int,
                         help='select how many extra numbers to draw')
+    parser.add_argument('-c', '--config', action='store', default=Path('config.toml'), type=str,
+                        help='path to config file')
 
     args = parser.parse_args()
 
     try:
         superenalotto = Lottery(
             max_num=args.numbers, draw_sz=args.numsz,
-            max_ext=args.extras, xtr_sz=args.xtrsz
+            max_ext=args.extras, xtr_sz=args.xtrsz,
+            from_config=args.config
         )
 
         backend = input(
