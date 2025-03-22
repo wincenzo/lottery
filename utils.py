@@ -2,7 +2,7 @@ import tomllib
 from dataclasses import dataclass, field
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Iterable, Optional, Protocol
+from typing import Callable, Iterable, Optional, Protocol
 
 
 @dataclass(slots=True)
