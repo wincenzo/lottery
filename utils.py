@@ -14,7 +14,7 @@ def validate_draw_params(func) -> Callable:
     def wrapper(self, size: int, max_num: int, *args, **kwargs):
         if not 0 < size <= max_num:
             raise ValueError(
-                f"Invalid draw parameters: size={size}, max_num={max_num}")
+                f"Invalid draw parameters: {size=}, {max_num=}, size must be between 1 and max value")
         return func(self, size, max_num, *args, **kwargs)
     return wrapper
 
@@ -28,11 +28,23 @@ class Extraction:
 @dataclass(frozen=True)
 class Config:
     """Configuration settings for lottery draws"""
-    max_numbers: int = field(default=90)
-    draw_size: int = field(default=6)
+    max_num: int = field(default=90)
+    draw_sz: int = field(default=6)
     max_ext: int = field(default=90)
     xtr_sz: int = field(default=1)
     max_draw_iters: int = field(default=100_000)
+
+    def __post_init__(self):
+        if self.max_num < 1:
+            raise ValueError("max_numbers must be positive")
+        if not 0 < self.draw_sz <= self.max_num:
+            raise ValueError("draw_size must be between 1 and max_numbers")
+        if not 0 <= self.xtr_sz <= self.max_ext:
+            raise ValueError("xtr_size must be between 1 and max_ext")
+        if self.max_ext < 0:
+            raise ValueError("max_ext cannot be negative")
+        if self.max_draw_iters < 1:
+            raise ValueError("max_draw_iters must be positive")
 
     @classmethod
     def load_config(cls, path: Path | str) -> 'Config':
@@ -40,10 +52,10 @@ class Config:
             with open(path, 'rb') as f:
                 config = tomllib.load(f)
                 return cls(
-                    max_numbers=config.get(
-                        'max_numbers', cls.max_numbers),
-                    draw_size=config.get(
-                        'draw_size', cls.draw_size),
+                    max_num=config.get(
+                        'max_numbers', cls.max_num),
+                    draw_sz=config.get(
+                        'draw_size', cls.draw_sz),
                     max_ext=config.get(
                         'max_extra_numbers', cls.max_ext),
                     xtr_sz=config.get(

@@ -34,19 +34,19 @@ class Lottery:
     )
 
     def __init__(self,
-                 max_num: int = 90,
-                 draw_sz: int = 6,
-                 max_ext: int = 90,
-                 xtr_sz: int = 1,
+                 max_num: Optional[int] = None,
+                 draw_sz: Optional[int] = None,
+                 max_ext: Optional[int] = None,
+                 xtr_sz: Optional[int] = None,
                  from_config: Optional[Path | str] = None
                  ) -> None:
 
         self.CONFIG: Config = Config.load_config(
             from_config) if from_config else Config()
-        self.max_num: int = self.CONFIG.max_numbers or max_num 
-        self.draw_sz: int = self.CONFIG.draw_size or draw_sz
-        self.max_ext: int = self.CONFIG.max_ext or max_ext
-        self.xtr_sz: int = self.CONFIG.xtr_sz or xtr_sz
+        self.max_num: int = max_num or self.CONFIG.max_num
+        self.draw_sz: int = draw_sz or self.CONFIG.draw_sz 
+        self.max_ext: int = max_ext or self.CONFIG.max_ext
+        self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz 
         self._iters: int = 1
         self.result: Extraction = Extraction(draw=())
 
