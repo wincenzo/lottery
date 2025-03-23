@@ -30,8 +30,8 @@ class Config:
     """Configuration settings for lottery draws"""
     max_numbers: int = field(default=90)
     draw_size: int = field(default=6)
-    max_ext: int = field(default=0)
-    xtr_sz: int = field(default=0)
+    max_ext: int = field(default=90)
+    xtr_sz: int = field(default=1)
     max_draw_iters: int = field(default=100_000)
 
     @classmethod
@@ -43,16 +43,16 @@ class Config:
                     max_numbers=config.get(
                         'max_numbers', cls.max_numbers),
                     draw_size=config.get(
-                        'default_draw_size', cls.draw_size),
+                        'draw_size', cls.draw_size),
                     max_ext=config.get(
-                        'max_ext', cls.max_ext),
+                        'max_extra_numbers', cls.max_ext),
                     xtr_sz=config.get(
-                        'xtr_sz', cls.xtr_sz),
+                        'extra_size', cls.xtr_sz),
                     max_draw_iters=config.get(
                         'max_draw_iters', cls.max_draw_iters),
                 )
         except (FileNotFoundError, tomllib.TOMLDecodeError) as e:
-            print(f"Config error: {e}, using defaults")
+            print(f"Config error: {e}, using default configs.")
             return cls()
 
 
