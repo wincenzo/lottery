@@ -44,9 +44,9 @@ class Lottery:
         self.CONFIG: Config = Config.load_config(
             from_config) if from_config else Config()
         self.max_num: int = max_num or self.CONFIG.max_num
-        self.draw_sz: int = draw_sz or self.CONFIG.draw_sz 
+        self.draw_sz: int = draw_sz or self.CONFIG.draw_sz
         self.max_ext: int = max_ext or self.CONFIG.max_ext
-        self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz 
+        self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self._iters: int = 1
         self.result: Extraction = Extraction(draw=())
 
