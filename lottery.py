@@ -20,7 +20,12 @@ locale.setlocale(locale.LC_ALL, locale='it_IT')
 
 class Lottery:
     BACKENDS: ClassVar[tuple[str, ...]] = (
-        'choice', 'randint', 'randrange', 'sample', 'shuffle')
+        'choice',
+        'randint',
+        'randrange',
+        'sample',
+        'shuffle',
+    )
 
     __slots__ = (
         'max_num',
@@ -38,10 +43,11 @@ class Lottery:
                  draw_sz: Optional[int] = None,
                  max_ext: Optional[int] = None,
                  xtr_sz: Optional[int] = None,
-                 config_path: Optional[Path | str] = None
-                 ) -> None:
+                 config_path: Optional[Path | str] = None) -> None:
 
-        self.CONFIG: Config = Config.load_config(config_path) if config_path else Config()
+        self.CONFIG: Config = (
+            Config.load_config(config_path) if config_path else Config()
+        )
         self.max_num: int = max_num or self.CONFIG.max_num
         self.draw_sz: int = draw_sz or self.CONFIG.draw_sz
         self.max_ext: int = max_ext or self.CONFIG.max_ext
@@ -132,7 +138,7 @@ class Lottery:
             futures = (
                 executor.submit(self.draw_once, size, max_num)
                 for _ in tqdm(range(self._iters),
-                              desc=f"Estraendo ...",
+                              desc="Estraendo ...",
                               unit="estrazioni",
                               ncols=80,
                               bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
@@ -146,8 +152,10 @@ class Lottery:
 
             while (length := len(draws)) >= 10:
                 draws = tuple(compress(draws, selections(length)))
+            else:
+                draws = rnd.choice(draws)
 
-            return rnd.choice(draws)
+            return draws
 
     @contextmanager
     def drawing_session(self):
@@ -190,8 +198,10 @@ class Lottery:
         return result
 
     def __repr__(self) -> str:
-        return (f'Lottery(max_num={self.max_num}, max_ext={self.max_ext},'
-                f' draw_sz={self.draw_sz}, xtr_sz={self.xtr_sz})')
+        return (
+            f'Lottery(max_num={self.max_num}, max_ext={self.max_ext},'
+            f' draw_sz={self.draw_sz}, xtr_sz={self.xtr_sz})'
+        )
 
 
 if __name__ == '__main__':
@@ -207,17 +217,15 @@ if __name__ == '__main__':
                         help='select how many numbers to draw')
     parser.add_argument('--xtrsz', action='store', default=0, type=int,
                         help='select how many extra numbers to draw')
-    parser.add_argument('-c', '--config', action='store', default=Path('config.toml'), type=str,
-                        help='path to config file')
+    parser.add_argument('-c', '--config', action='store', default=Path('config.toml'),
+                        type=str, help='path to config file')
 
     args = parser.parse_args()
 
     try:
-        superenalotto = Lottery(
-            max_num=args.numbers, draw_sz=args.numsz,
-            max_ext=args.extras, xtr_sz=args.xtrsz,
-            config_path=args.config
-        )
+        superenalotto = Lottery(max_num=args.numbers, draw_sz=args.numsz,
+                                max_ext=args.extras, xtr_sz=args.xtrsz,
+                                config_path=args.config)
 
         backend = input(
             'Scegli il backend (choice, randint, randrange, sample, shuffle): ').lower()
