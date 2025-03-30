@@ -221,7 +221,7 @@ if __name__ == '__main__':
         )
 
         backend = input(
-            'Scegli il backend (choice, randint, randrange, sample, shuffle): ')
+            'Scegli il backend (choice, randint, randrange, sample, shuffle): ').lower()
 
         print(superenalotto(backend=backend, many=args.many))
 
