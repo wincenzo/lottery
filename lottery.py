@@ -38,11 +38,10 @@ class Lottery:
                  draw_sz: Optional[int] = None,
                  max_ext: Optional[int] = None,
                  xtr_sz: Optional[int] = None,
-                 from_config: Optional[Path | str] = None
+                 config_path: Optional[Path | str] = None
                  ) -> None:
 
-        self.CONFIG: Config = Config.load_config(
-            from_config) if from_config else Config()
+        self.CONFIG: Config = Config.load_config(config_path) if config_path else Config()
         self.max_num: int = max_num or self.CONFIG.max_num
         self.draw_sz: int = draw_sz or self.CONFIG.draw_sz
         self.max_ext: int = max_ext or self.CONFIG.max_ext
@@ -217,7 +216,7 @@ if __name__ == '__main__':
         superenalotto = Lottery(
             max_num=args.numbers, draw_sz=args.numsz,
             max_ext=args.extras, xtr_sz=args.xtrsz,
-            from_config=args.config
+            config_path=args.config
         )
 
         backend = input(
