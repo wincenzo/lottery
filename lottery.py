@@ -153,9 +153,7 @@ class Lottery:
             while (length := len(draws)) >= 10:
                 draws = tuple(compress(draws, selections(length)))
             else:
-                draws = rnd.choice(draws)
-
-            return draws
+                return rnd.choice(draws)
 
     @contextmanager
     def drawing_session(self):
