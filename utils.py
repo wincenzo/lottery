@@ -65,6 +65,7 @@ class Config:
                 )
         except (FileNotFoundError, tomllib.TOMLDecodeError) as e:
             print(f"Config error: {e}, using default configs.")
+            
             return cls()
 
 
