@@ -226,7 +226,7 @@ if __name__ == '__main__':
                                 config_path=args.config)
 
         backend = input(
-            'Scegli il backend (choice, randint, randrange, sample, shuffle): ').lower()
+            'Scegli il backend (choice, randint, randrange, sample, shuffle) o premi invio: ').lower()
 
         print(superenalotto(backend=backend, many=args.many))
 
