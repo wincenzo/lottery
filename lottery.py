@@ -46,8 +46,7 @@ class Lottery:
                  config_path: Optional[Path | str] = None) -> None:
 
         self.CONFIG: Config = (
-            Config.load_config(config_path) if config_path else Config()
-        )
+            Config.load_config(config_path) if config_path else Config())
         self.max_num: int = max_num or self.CONFIG.max_num
         self.draw_sz: int = draw_sz or self.CONFIG.draw_sz
         self.max_ext: int = max_ext or self.CONFIG.max_ext
@@ -163,14 +162,16 @@ class Lottery:
             extra = self.drawer(
                 self.xtr_sz, self.max_ext) if get_extra else self.result.extra
             yield draw, extra
+
         except Exception as e:
             print(f'Error: {e}')
             raise
+
         finally:
             self._iters = 0
-
             try:
                 del draw, extra
+
             except UnboundLocalError:
                 pass
 
