@@ -43,20 +43,23 @@ class Lottery:
                  draw_sz: Optional[int] = None,
                  max_ext: Optional[int] = None,
                  xtr_sz: Optional[int] = None,
-                 config_path: Optional[Path | str] = None) -> None:
+                 config_path: Optional[Path | str] = None,
+                 user_nums: Optional[list[int]] = None) -> None:
 
         self.CONFIG: Config = (
             Config.load_config(config_path) if config_path else Config())
+        self.user_nums: list[int] = user_nums or self.CONFIG.user_nums
         self.max_num: int = max_num or self.CONFIG.max_num
-        self.draw_sz: int = draw_sz or self.CONFIG.draw_sz
+        self.draw_sz: int = (
+            draw_sz or self.CONFIG.draw_sz) - len(self.user_nums)
         self.max_ext: int = max_ext or self.CONFIG.max_ext
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self._iters: int = 1
-        self.result: Extraction = Extraction(draw=())
+        self.result: Extraction = Extraction(draw=[])
 
     @cached_property
-    def numbers(self) -> range:
-        return range(1, self.max_num+1)
+    def numbers(self) -> list[int]:
+        return [n for n in range(1, self.max_num+1) if n not in self.user_nums]
 
     @property
     def backend(self) -> DrawMethod:
@@ -98,26 +101,27 @@ class Lottery:
         return extraction
 
     def choice(self, size: int, max_num: int) -> tuple[int, ...]:
-        numbers = list(self.numbers)
+        numbers = self.numbers.copy()
+        n_items = len(numbers)
 
         def draw():
-            nonlocal max_num
-            number = numbers.pop(rnd.choice(range(max_num)))
-            max_num -= 1
+            nonlocal n_items
+            number = numbers.pop(rnd.choice(range(n_items)))
+            n_items -= 1
             return number
 
         return tuple(starmap(draw, repeat((), size)))
 
     def sample(self, size: int, max_num: int) -> tuple[int, ...]:
-        indexes = itemgetter(*rnd.sample(range(max_num), k=size))
+        indexes = itemgetter(*rnd.sample(range(len(self.numbers)), k=size))
         numbers = indexes(self.numbers)
 
         return numbers if isinstance(numbers, tuple) else (numbers,)
 
     def shuffle(self, size: int, *args) -> list[int]:
-        numbers = list(self.numbers)
+        numbers = self.numbers.copy()
         rnd.shuffle(numbers)
-        start = rnd.randint(0, self.max_num-size)
+        start = rnd.randint(0, len(self.numbers)-size)
         stop = start + size
         grab = slice(start, stop, None)
 
@@ -125,7 +129,6 @@ class Lottery:
 
     def draw_once(self, size: int, max_num: int) -> Iterable[int]:
         self.backend = self.init_backend
-
         return self.backend(size, max_num)
 
     @validate_draw_params
@@ -150,7 +153,7 @@ class Lottery:
             draws = [f.result() for f in as_completed(futures)]
 
             while (length := len(draws)) >= 10:
-                draws = tuple(compress(draws, selections(length)))
+                draws = list(compress(draws, selections(length)))
             else:
                 return rnd.choice(draws)
 
@@ -158,6 +161,8 @@ class Lottery:
     def drawing_session(self):
         try:
             draw = self.drawer(self.draw_sz, self.max_num)
+            draw = list(draw)
+            draw.extend(self.user_nums)
             get_extra = all((self.xtr_sz, self.max_ext))
             extra = self.drawer(
                 self.xtr_sz, self.max_ext) if get_extra else self.result.extra
@@ -218,13 +223,15 @@ if __name__ == '__main__':
                         help='select how many extra numbers to draw')
     parser.add_argument('-c', '--config', action='store', default=Path('config.toml'),
                         type=str, help='path to config file')
+    parser.add_argument('-u', '--user_nums', action='store', nargs='*', type=int,
+                        help='list of user numbers to include in the draw')
 
     args = parser.parse_args()
 
     try:
         superenalotto = Lottery(max_num=args.numbers, draw_sz=args.numsz,
                                 max_ext=args.extras, xtr_sz=args.xtrsz,
-                                config_path=args.config)
+                                config_path=args.config, user_nums=args.user_nums)
 
         backend = input(
             'Scegli il backend (choice, randint, randrange, sample, shuffle) o premi invio: ').lower()

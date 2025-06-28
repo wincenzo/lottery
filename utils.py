@@ -21,8 +21,8 @@ def validate_draw_params(func) -> Callable:
 
 @dataclass(slots=True)
 class Extraction:
-    draw: tuple[int, ...]
-    extra: Optional[tuple[int, ...]] = field(default=None)
+    draw: list[int]
+    extra: Optional[list[int]] = field(default=None)
 
 
 @dataclass(frozen=True)
@@ -33,6 +33,7 @@ class Config:
     max_ext: int = field(default=90)
     xtr_sz: int = field(default=1)
     max_draw_iters: int = field(default=100_000)
+    user_nums: list[int] = field(default_factory=list)
 
     def __post_init__(self):
         if self.max_num < 1:
@@ -52,20 +53,16 @@ class Config:
             with open(path, 'rb') as f:
                 config = tomllib.load(f)
                 return cls(
-                    max_num=config.get(
-                        'max_numbers', cls.max_num),
-                    draw_sz=config.get(
-                        'draw_size', cls.draw_sz),
-                    max_ext=config.get(
-                        'max_extra_numbers', cls.max_ext),
-                    xtr_sz=config.get(
-                        'extra_size', cls.xtr_sz),
-                    max_draw_iters=config.get(
-                        'max_draw_iters', cls.max_draw_iters),
+                    max_num=config.get('max_numbers', cls.max_num),
+                    draw_sz=config.get('draw_size', cls.draw_sz),
+                    max_ext=config.get('max_extra_numbers', cls.max_ext),
+                    xtr_sz=config.get('extra_size', cls.xtr_sz),
+                    max_draw_iters=config.get('max_draw_iters', cls.max_draw_iters),
+                    user_nums=config.get('user_numbers', [])
                 )
         except (FileNotFoundError, tomllib.TOMLDecodeError) as e:
             print(f"Config error: {e}, using default configs.")
-            
+
             return cls()
 
 
