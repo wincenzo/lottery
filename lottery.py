@@ -167,16 +167,13 @@ class Lottery:
             extra = self.drawer(
                 self.xtr_sz, self.max_ext) if get_extra else self.result.extra
             yield draw, extra
-
         except Exception as e:
             print(f'Error: {e}')
             raise
-
         finally:
             self._iters = 0
             try:
                 del draw, extra
-
             except UnboundLocalError:
                 pass
 
