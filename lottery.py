@@ -51,7 +51,7 @@ class Lottery:
         self.user_nums: list[int] = user_nums or self.CONFIG.user_nums
         self.max_num: int = max_num or self.CONFIG.max_num
         self.draw_sz: int = (
-            draw_sz or self.CONFIG.draw_sz) - len(self.user_nums)
+            draw_sz or self.CONFIG.draw_sz) #- len(self.user_nums)
         self.max_ext: int = max_ext or self.CONFIG.max_ext
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self._iters: int = 1
@@ -76,11 +76,11 @@ class Lottery:
     def random_backend(self) -> DrawMethod:
         return getattr(self, rnd.choice(self.BACKENDS))
 
-    @staticmethod
-    def randrange(size: int, max_num: int) -> set[int]:
+    # @staticmethod
+    def randrange(self, size: int, max_num: int) -> set[int]:
         draw = iter(lambda: rnd.randrange(1, max_num+1), None)
 
-        extraction = set()
+        extraction = set(self.user_nums)
         for number in draw:
             extraction.add(number)
             if len(extraction) == size:
@@ -88,19 +88,20 @@ class Lottery:
 
         return extraction
 
-    @staticmethod
-    def randint(size: int, max_num: int) -> set[int]:
+    # @staticmethod
+    def randint(self, size: int, max_num: int) -> set[int]:
         def draw() -> Iterator[int]:
             for _ in repeat(None):
                 yield rnd.randint(1, max_num)
 
-        extraction = {next(draw())}
+        extraction = {*self.user_nums}
         while len(extraction) < size:
             extraction.add(next(draw()))
 
         return extraction
 
-    def choice(self, size: int, max_num: int) -> tuple[int, ...]:
+    def choice(self, size: int, *args) -> tuple[int, ...]:
+        size -= len(self.user_nums)
         numbers = self.numbers.copy()
         n_items = len(numbers)
 
@@ -112,14 +113,16 @@ class Lottery:
 
         return tuple(starmap(draw, repeat((), size)))
 
-    def sample(self, size: int, max_num: int) -> tuple[int, ...]:
+    def sample(self, size: int, *args) -> tuple[int, ...]:
+        size -= len(self.user_nums)
         indexes = itemgetter(*rnd.sample(range(len(self.numbers)), k=size))
         numbers = indexes(self.numbers)
 
         return numbers if isinstance(numbers, tuple) else (numbers,)
 
     def shuffle(self, size: int, *args) -> list[int]:
-        numbers = self.numbers.copy()
+        size -= len(self.user_nums)
+        numbers = self.numbers
         rnd.shuffle(numbers)
         start = rnd.randint(0, len(self.numbers)-size)
         stop = start + size
@@ -161,8 +164,9 @@ class Lottery:
     def drawing_session(self):
         try:
             draw = self.drawer(self.draw_sz, self.max_num)
-            draw = list(draw)
-            draw.extend(self.user_nums)
+            draw = set(draw)
+            draw.update(self.user_nums)
+            
             get_extra = all((self.xtr_sz, self.max_ext))
             extra = self.drawer(
                 self.xtr_sz, self.max_ext) if get_extra else self.result.extra
