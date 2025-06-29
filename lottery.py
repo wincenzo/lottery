@@ -50,11 +50,11 @@ class Lottery:
             Config.load_config(config_path) if config_path else Config())
         self.user_nums: list[int] = user_nums or self.CONFIG.user_nums
         self.max_num: int = max_num or self.CONFIG.max_num
-        self.draw_sz: int = (
-            draw_sz or self.CONFIG.draw_sz) #- len(self.user_nums)
+        self.draw_sz: int = (draw_sz or self.CONFIG.draw_sz)
         self.max_ext: int = max_ext or self.CONFIG.max_ext
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self._iters: int = 1
+        self._size: int = self.draw_sz - len(self.user_nums)
         self.result: Extraction = Extraction(draw=set())
 
     @cached_property
@@ -98,8 +98,7 @@ class Lottery:
 
         return extraction
 
-    def choice(self, size: int, *args) -> tuple[int, ...]:
-        size -= len(self.user_nums)
+    def choice(self, *args) -> tuple[int, ...]:
         numbers = self.numbers.copy()
         n_items = len(numbers)
 
@@ -109,21 +108,20 @@ class Lottery:
             n_items -= 1
             return number
 
-        return tuple(starmap(draw, repeat((), size)))
+        return tuple(starmap(draw, repeat((), self._size)))
 
-    def sample(self, size: int, *args) -> tuple[int, ...]:
-        size -= len(self.user_nums)
-        indexes = itemgetter(*rnd.sample(range(len(self.numbers)), k=size))
+    def sample(self, *args) -> tuple[int, ...]:
+        indexes = itemgetter(
+            *rnd.sample(range(len(self.numbers)), k=self._size))
         numbers = indexes(self.numbers)
 
         return numbers if isinstance(numbers, tuple) else (numbers,)
 
-    def shuffle(self, size: int, *args) -> list[int]:
-        size -= len(self.user_nums)
+    def shuffle(self, *args) -> list[int]:
         numbers = self.numbers
         rnd.shuffle(numbers)
-        start = rnd.randint(0, len(self.numbers)-size)
-        stop = start + size
+        start = rnd.randint(0, len(self.numbers)-self._size)
+        stop = start + self._size
         grab = slice(start, stop, None)
 
         return numbers[grab]
@@ -163,7 +161,7 @@ class Lottery:
         try:
             draw = set(self.drawer(self.draw_sz, self.max_num))
             draw.update(self.user_nums)
-            
+
             get_extra = all((self.xtr_sz, self.max_ext))
             extra = self.drawer(
                 self.xtr_sz, self.max_ext) if get_extra else self.result.extra
