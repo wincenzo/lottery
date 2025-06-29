@@ -55,7 +55,7 @@ class Lottery:
         self.max_ext: int = max_ext or self.CONFIG.max_ext
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self._iters: int = 1
-        self.result: Extraction = Extraction(draw=[])
+        self.result: Extraction = Extraction(draw=set())
 
     @cached_property
     def numbers(self) -> list[int]:
