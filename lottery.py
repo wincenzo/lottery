@@ -76,7 +76,6 @@ class Lottery:
     def random_backend(self) -> DrawMethod:
         return getattr(self, rnd.choice(self.BACKENDS))
 
-    # @staticmethod
     def randrange(self, size: int, max_num: int) -> set[int]:
         draw = iter(lambda: rnd.randrange(1, max_num+1), None)
 
@@ -88,7 +87,6 @@ class Lottery:
 
         return extraction
 
-    # @staticmethod
     def randint(self, size: int, max_num: int) -> set[int]:
         def draw() -> Iterator[int]:
             for _ in repeat(None):
@@ -163,8 +161,7 @@ class Lottery:
     @contextmanager
     def drawing_session(self):
         try:
-            draw = self.drawer(self.draw_sz, self.max_num)
-            draw = set(draw)
+            draw = set(self.drawer(self.draw_sz, self.max_num))
             draw.update(self.user_nums)
             
             get_extra = all((self.xtr_sz, self.max_ext))
