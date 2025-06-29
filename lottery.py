@@ -45,6 +45,21 @@ class Lottery:
                  xtr_sz: Optional[int] = None,
                  config_path: Optional[Path | str] = None,
                  user_nums: Optional[list[int]] = None) -> None:
+        """
+        Initialize a Lottery instance with configuration and user preferences.
+
+        Parameters:
+            max_num (Optional[int]): The maximum number that can be drawn. If not provided, uses the value from config.
+            draw_sz (Optional[int]): The number of main numbers to draw. If not provided, uses the value from config.
+            max_ext (Optional[int]): The maximum number for extra draws. If not provided, uses the value from config.
+            xtr_sz (Optional[int]): The number of extra numbers to draw. If not provided, uses the value from config.
+            config_path (Optional[Path | str]): Path to a TOML configuration file. If not provided, uses defaults.
+            user_nums (Optional[list[int]]): List of user-chosen numbers to always include in the draw.
+
+        Notes:
+            - If a parameter is not provided, its value is loaded from the configuration file or defaults.
+            - User numbers are excluded from the pool of available numbers for random draws.
+        """
 
         self.CONFIG: Config = (
             Config.load_config(config_path) if config_path else Config())
