@@ -21,8 +21,8 @@ def validate_draw_params(func) -> Callable:
 
 @dataclass(slots=True)
 class Extraction:
-    draw: list[int]
-    extra: Optional[list[int]] = field(default=None)
+    draw: Iterable[int]
+    extra: Optional[Iterable[int]] = field(default=None)
 
 
 @dataclass(frozen=True)
