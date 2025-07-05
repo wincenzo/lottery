@@ -172,7 +172,7 @@ class Lottery:
                 return rnd.choice(draws)
 
     @contextmanager
-    def drawing_session(self):
+    def drawing_session(self) -> Iterator[tuple[set[int], set[int] | None]]:
         try:
             draw = set(self.drawer(self.draw_sz, self.max_num))
             draw.update(self.user_nums)
@@ -180,6 +180,7 @@ class Lottery:
             get_extra = all((self.xtr_sz, self.max_ext))
             extra = self.drawer(
                 self.xtr_sz, self.max_ext) if get_extra else self.result.extra
+            
             yield draw, extra
         except Exception as e:
             print(f'Error: {e}')
