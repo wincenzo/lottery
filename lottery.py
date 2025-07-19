@@ -94,7 +94,7 @@ class Lottery:
     def randrange(self, size: int, max_num: int) -> set[int]:
         draw = iter(lambda: rnd.randrange(1, max_num+1), None)
 
-        extraction = set()
+        extraction = set(self.user_nums)
         for number in draw:
             extraction.add(number)
             if len(extraction) == size:
@@ -107,14 +107,14 @@ class Lottery:
             for _ in repeat(None):
                 yield rnd.randint(1, max_num)
 
-        extraction = {next(draw())}
+        extraction = {*self.user_nums}
         while len(extraction) < size:
             extraction.add(next(draw()))
 
         return extraction
 
     def choice(self, size: int, max_num: int) -> tuple[int, ...]:
-        numbers = self._numbers[:max_num].copy()
+        numbers = self._numbers[:max_num]
         n_items = len(numbers)
 
         def draw():
@@ -126,6 +126,7 @@ class Lottery:
         return tuple(starmap(draw, repeat((), size)))
 
     def sample(self, size: int, max_num: int) -> tuple[int, ...]:
+        # don't need to copy self._numbers because of slicing creating a new object
         numbers = self._numbers[:max_num]
         indexes = itemgetter(
             *rnd.sample(range(len(numbers)), k=size))
@@ -177,14 +178,14 @@ class Lottery:
         try:
             if self.user_nums:
                 self._numbers = list(
-                    filter(lambda n: n not in self.user_nums, self.numbers))
+                    filter(lambda n: n not in self.user_nums, self._numbers))
                 self.draw_sz = self.draw_sz - len(self.user_nums)
-                self.max_num = self.max_num - len(self.user_nums)
 
             draw = set(self.drawer(self.draw_sz, self.max_num))
             draw.update(self.user_nums)
 
             if all((self.xtr_sz, self.max_ext)):
+                self.user_nums = []
                 self._numbers = list(self.numbers)
                 extra = self.drawer(self.xtr_sz, self.max_ext)
             else:
