@@ -91,29 +91,29 @@ class Lottery:
     def random_backend(self) -> DrawMethod:
         return getattr(self, rnd.choice(self.BACKENDS))
 
-    def randrange(self, size: int, max_num: int) -> set[int]:
+    def randrange(self, max_num: int, size) -> set[int]:
         draw = iter(lambda: rnd.randrange(1, max_num+1), None)
 
         extraction = set(self.user_nums)
         for number in draw:
             extraction.add(number)
-            if len(extraction) == size:
+            if len(extraction) == size + len(self.user_nums):
                 break
 
         return extraction
 
-    def randint(self, size: int, max_num: int) -> set[int]:
+    def randint(self, max_num: int, size) -> set[int]:
         def draw() -> Iterator[int]:
             for _ in repeat(None):
                 yield rnd.randint(1, max_num)
 
         extraction = {*self.user_nums}
-        while len(extraction) < size:
+        while len(extraction) < size + len(self.user_nums):
             extraction.add(next(draw()))
 
         return extraction
 
-    def choice(self, size: int, max_num: int) -> tuple[int, ...]:
+    def choice(self, max_num: int, size: int) -> tuple[int, ...]:
         numbers = self._numbers[:max_num]
         n_items = len(numbers)
 
@@ -125,36 +125,35 @@ class Lottery:
 
         return tuple(starmap(draw, repeat((), size)))
 
-    def sample(self, size: int, max_num: int) -> tuple[int, ...]:
+    def sample(self, max_num: int, size: int) -> tuple[int, ...]:
         # don't need to copy self._numbers because of slicing creating a new object
         numbers = self._numbers[:max_num]
-        indexes = itemgetter(
-            *rnd.sample(range(len(numbers)), k=size))
+        indexes = itemgetter(*rnd.sample(range(len(numbers)), k=size))
         numbers = indexes(numbers)
 
         return numbers if isinstance(numbers, tuple) else (numbers,)
 
-    def shuffle(self, size: int, max_num: int) -> list[int]:
+    def shuffle(self, max_num: int, size: int) -> list[int]:
         numbers = self._numbers[:max_num]
         rnd.shuffle(numbers)
-        start = rnd.randint(0, len(self._numbers)-size)
+        start = rnd.randint(0, len(numbers)-size)
         stop = start + size
         grab = slice(start, stop, None)
 
         return numbers[grab]
 
-    def draw_once(self, size: int, max_num: int) -> Iterable[int]:
+    def draw_once(self, max_num: int, size: int) -> Iterable[int]:
         self.backend = self.init_backend
-        return self.backend(size, max_num)
+        return self.backend(max_num, size)
 
     @validate_draw_params
-    def drawer(self, size: int, max_num: int) -> Iterable[int]:
+    def drawer(self, max_num: int, size: int) -> Iterable[int]:
         """
         Adds randomness by simulating multiple draws.
         """
         with ThreadPoolExecutor() as executor:
             futures = (
-                executor.submit(self.draw_once, size, max_num)
+                executor.submit(self.draw_once, max_num, size)
                 for _ in tqdm(range(self._iters),
                               desc="Estraendo ...",
                               unit="estrazioni",
@@ -178,16 +177,16 @@ class Lottery:
         try:
             if self.user_nums:
                 self._numbers = list(
-                    filter(lambda n: n not in self.user_nums, self._numbers))
+                    filter(lambda n: n not in self.user_nums, self.numbers))
                 self.draw_sz = self.draw_sz - len(self.user_nums)
 
-            draw = set(self.drawer(self.draw_sz, self.max_num))
+            draw = set(self.drawer(self.max_num, self.draw_sz))
             draw.update(self.user_nums)
 
             if all((self.xtr_sz, self.max_ext)):
                 self.user_nums = []
                 self._numbers = list(self.numbers)
-                extra = self.drawer(self.xtr_sz, self.max_ext)
+                extra = self.drawer(self.max_ext, self.xtr_sz)
             else:
                 extra = self.result.extra
 

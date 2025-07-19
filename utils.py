@@ -11,15 +11,15 @@ def validate_draw_params(func) -> Callable:
     the range of 1 to max_num. This to avoid repetitions in the draw.
     '''
     @wraps(func)
-    def wrapper(self, size: int, max_num: int, *args, **kwargs):
+    def wrapper(self, max_num: int, size: int, *args, **kwargs):
         if not 0 < size <= max_num:
             raise ValueError(
                 f"Invalid draw parameters: {size=}, {max_num=}, size must be between 1 and max value")
-        return func(self, size, max_num, *args, **kwargs)
+        return func(self, max_num, size, *args, **kwargs)
     return wrapper
 
 
-@dataclass(slots=True)
+@dataclass(slots=True)  
 class Extraction:
     draw: set[int]
     extra: Optional[set[int]] = field(default=None)
