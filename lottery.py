@@ -68,13 +68,13 @@ class Lottery:
         self.draw_sz: int = (draw_sz or self.CONFIG.draw_sz)
         self.max_ext: int = max_ext or self.CONFIG.max_ext
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
-        self._iters: int = 1
-        self._size: int = self.draw_sz - len(self.user_nums)
         self.result: Extraction = Extraction(draw=set())
+        self._iters: int = 1
+        self._numbers: list[int] = list(self.numbers)
 
     @cached_property
-    def numbers(self) -> list[int]:
-        return [n for n in range(1, self.max_num+1) if n not in self.user_nums]
+    def numbers(self) -> range:
+        return range(1, self.max_num + 1)
 
     @property
     def backend(self) -> DrawMethod:
@@ -94,7 +94,7 @@ class Lottery:
     def randrange(self, size: int, max_num: int) -> set[int]:
         draw = iter(lambda: rnd.randrange(1, max_num+1), None)
 
-        extraction = set(self.user_nums)
+        extraction = set()
         for number in draw:
             extraction.add(number)
             if len(extraction) == size:
@@ -107,14 +107,14 @@ class Lottery:
             for _ in repeat(None):
                 yield rnd.randint(1, max_num)
 
-        extraction = {*self.user_nums}
+        extraction = {next(draw())}
         while len(extraction) < size:
             extraction.add(next(draw()))
 
         return extraction
 
-    def choice(self, *args) -> tuple[int, ...]:
-        numbers = self.numbers.copy()
+    def choice(self, size: int, max_num: int) -> tuple[int, ...]:
+        numbers = self._numbers[:max_num].copy()
         n_items = len(numbers)
 
         def draw():
@@ -123,20 +123,21 @@ class Lottery:
             n_items -= 1
             return number
 
-        return tuple(starmap(draw, repeat((), self._size)))
+        return tuple(starmap(draw, repeat((), size)))
 
-    def sample(self, *args) -> tuple[int, ...]:
+    def sample(self, size: int, max_num: int) -> tuple[int, ...]:
+        numbers = self._numbers[:max_num]
         indexes = itemgetter(
-            *rnd.sample(range(len(self.numbers)), k=self._size))
-        numbers = indexes(self.numbers)
+            *rnd.sample(range(len(numbers)), k=size))
+        numbers = indexes(numbers)
 
         return numbers if isinstance(numbers, tuple) else (numbers,)
 
-    def shuffle(self, *args) -> list[int]:
-        numbers = self.numbers
+    def shuffle(self, size: int, max_num: int) -> list[int]:
+        numbers = self._numbers[:max_num]
         rnd.shuffle(numbers)
-        start = rnd.randint(0, len(self.numbers)-self._size)
-        stop = start + self._size
+        start = rnd.randint(0, len(self._numbers)-size)
+        stop = start + size
         grab = slice(start, stop, None)
 
         return numbers[grab]
@@ -174,13 +175,21 @@ class Lottery:
     @contextmanager
     def drawing_session(self) -> Iterator[tuple[set[int], set[int] | None]]:
         try:
+            if self.user_nums:
+                self._numbers = list(
+                    filter(lambda n: n not in self.user_nums, self.numbers))
+                self.draw_sz = self.draw_sz - len(self.user_nums)
+                self.max_num = self.max_num - len(self.user_nums)
+
             draw = set(self.drawer(self.draw_sz, self.max_num))
             draw.update(self.user_nums)
 
-            get_extra = all((self.xtr_sz, self.max_ext))
-            extra = self.drawer(
-                self.xtr_sz, self.max_ext) if get_extra else self.result.extra
-            
+            if all((self.xtr_sz, self.max_ext)):
+                self._numbers = list(self.numbers)
+                extra = self.drawer(self.xtr_sz, self.max_ext)
+            else:
+                extra = self.result.extra
+
             yield draw, extra
         except Exception as e:
             print(f'Error: {e}')
