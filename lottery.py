@@ -28,6 +28,8 @@ class Lottery:
     )
 
     __slots__ = (
+        'CONFIG',
+        'init_backend',
         'max_num',
         'max_ext',
         'draw_sz',
@@ -35,6 +37,8 @@ class Lottery:
         'result',
         '_iters',
         '_backend',
+        'user_nums',
+        '_numbers',
         '__dict__',
     )
 
