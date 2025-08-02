@@ -46,6 +46,10 @@ class Config:
             raise ValueError("max_ext cannot be negative")
         if self.max_draw_iters < 1:
             raise ValueError("max_draw_iters must be positive")
+        
+        for n in self.user_nums:
+            if not 0 < n <= self.max_num:
+                raise ValueError(f"User number {n} is out of range (1 to {self.max_num})")
 
     @classmethod
     def load_config(cls, path: Path | str) -> 'Config':
@@ -62,7 +66,6 @@ class Config:
                 )
         except (FileNotFoundError, tomllib.TOMLDecodeError) as e:
             print(f"Config error: {e}, using default configs.")
-
             return cls()
 
 
