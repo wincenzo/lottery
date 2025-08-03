@@ -1,0 +1,6 @@
+max_numbers = 50
+draw_size = 5
+max_draw_iters = 100_000
+max_extra_numbers = 12
+extra_size = 2
+

@@ -2,6 +2,7 @@
 
 !utils.py
 !lottery.py
-!config.toml 
+!eurojackpot.toml
+!superenalotto.toml
 !README.md
 !.gitignore
