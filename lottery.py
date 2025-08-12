@@ -255,7 +255,7 @@ if __name__ == '__main__':
 
     try:
         concorso = input(
-            'Seleziona il concorso (eurojackpot, superenalotto): ').lower() or 'superenalotto'
+            'Seleziona il concorso (eurojackpot, superenalotto): ').lower()
 
         if not concorso:
             config = None
