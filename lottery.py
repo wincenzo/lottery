@@ -67,6 +67,7 @@ class Lottery:
 
         self.CONFIG: Config = (
             Config.load_config(config_path) if config_path else Config())
+
         self.user_nums: list[int] = user_nums or self.CONFIG.user_nums
         self.max_num: int = max_num or self.CONFIG.max_num
         self.draw_sz: int = (draw_sz or self.CONFIG.draw_sz)
