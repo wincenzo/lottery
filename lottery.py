@@ -119,6 +119,7 @@ class Lottery:
         return extraction
 
     def choice(self, max_num: int, size: int) -> tuple[int, ...]:
+        # don't need to copy self._numbers because of slicing creating a new object
         numbers = self._numbers[:max_num]
         n_items = len(numbers)
 
@@ -131,7 +132,6 @@ class Lottery:
         return tuple(starmap(draw, repeat((), size)))
 
     def sample(self, max_num: int, size: int) -> tuple[int, ...]:
-        # don't need to copy self._numbers because of slicing creating a new object
         numbers = self._numbers[:max_num]
         indexes = itemgetter(*rnd.sample(range(len(numbers)), k=size))
         numbers = indexes(numbers)
