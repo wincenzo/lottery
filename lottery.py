@@ -96,8 +96,8 @@ class Lottery:
     def random_backend(self) -> DrawMethod:
         return getattr(self, rnd.choice(self.BACKENDS))
 
-    def randrange(self, max_num: int, size) -> set[int]:
-        draw = iter(lambda: rnd.randrange(1, max_num+1), None)
+    def randint(self, max_num: int, size) -> set[int]:
+        draw = iter(lambda: rnd.randint(1, max_num), None)
 
         extraction = set(self.user_nums)
         for number in draw:
@@ -107,10 +107,10 @@ class Lottery:
 
         return extraction
 
-    def randint(self, max_num: int, size) -> set[int]:
+    def randrange(self, max_num: int, size) -> set[int]:
         def draw() -> Iterator[int]:
             for _ in repeat(None):
-                yield rnd.randint(1, max_num)
+                yield rnd.randrange(1, max_num+1)
 
         extraction = {*self.user_nums}
         while len(extraction) < size + len(self.user_nums):
