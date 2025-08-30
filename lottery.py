@@ -255,13 +255,13 @@ if __name__ == '__main__':
             'Seleziona il concorso (eurojackpot, superenalotto): ').lower()
 
         match concorso:
-            case '' | None:
+            case '':
                 config = None
                 print('Nessun concorso selezionato, usando configurazione predefinita: ')
-            case c if 'eurojackpot'.startswith(c):
+            case c if 'eurojackpot'.startswith(c.lower()):
                 config = Path('eurojackpot.toml')
                 print('Concorso Eurojackpot selezionato: ')
-            case c if 'superenalotto'.startswith(c):
+            case c if 'superenalotto'.startswith(c.lower()):
                 config = Path('superenalotto.toml')
                 print('Concorso Superenalotto selezionato: ')
             case _:
