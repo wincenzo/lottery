@@ -87,11 +87,7 @@ class Lottery:
 
     @backend.setter
     def backend(self, name: str) -> None:
-        match name:
-            case 'choice' | 'randint' | 'randrange' | 'sample' | 'shuffle':
-                self._backend = getattr(self, name)
-            case _:
-                self._backend = self.random_backend()
+        self._backend = getattr(self, name, self.random_backend())
 
     def random_backend(self) -> DrawMethod:
         return getattr(self, rnd.choice(self.BACKENDS))
@@ -258,24 +254,24 @@ if __name__ == '__main__':
         concorso = input(
             'Seleziona il concorso (eurojackpot, superenalotto): ').lower()
 
-        if not concorso:
-            config = None
-            print('Nessun concorso selezionato, usando configurazione predefinita: ')
-        elif 'eurojackpot'.startswith(concorso):
-            config = Path('eurojackpot.toml')
-            print('Concorso Eurojackpot selezionato: ')
-        elif 'superenalotto'.startswith(concorso):
-            config = Path('superenalotto.toml')
-            print('Concorso Superenalotto selezionato: ')
-        else:
-            config = None
-            print(
-                'Nessun concorso valido selezionato, usando configurazione predefinita: ')
+        match concorso:
+            case '' | None:
+                config = None
+                print('Nessun concorso selezionato, usando configurazione predefinita: ')
+            case c if 'eurojackpot'.startswith(c):
+                config = Path('eurojackpot.toml')
+                print('Concorso Eurojackpot selezionato: ')
+            case c if 'superenalotto'.startswith(c):
+                config = Path('superenalotto.toml')
+                print('Concorso Superenalotto selezionato: ')
+            case _:
+                config = None
+                print('Nessun concorso valido selezionato, usando configurazione predefinita: ')
 
         estrazione = Lottery(max_num=args.numbers, draw_sz=args.numsz,
                              max_ext=args.extras, xtr_sz=args.xtrsz,
                              config_path=config, user_nums=args.user_nums)
-        
+
         print(repr(estrazione), '\n', )
 
         backend = input(
