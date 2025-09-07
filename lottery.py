@@ -75,7 +75,6 @@ class Lottery:
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self.result: Extraction = Extraction(draw=set())
         self._iters: int = 1
-        # self._numbers: list[int] = list(self.numbers)
         self._numbers: range | list[int] = self.numbers
 
     @cached_property
