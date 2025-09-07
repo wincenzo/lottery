@@ -9,7 +9,7 @@ from functools import cached_property
 from itertools import compress, repeat, starmap
 from operator import itemgetter
 from pathlib import Path
-from typing import ClassVar, Iterable, Iterator, Optional, Self, Sequence
+from typing import ClassVar, Iterable, Iterator, Optional, Self
 
 from tqdm import tqdm
 
