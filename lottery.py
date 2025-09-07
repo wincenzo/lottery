@@ -9,7 +9,7 @@ from functools import cached_property
 from itertools import compress, repeat, starmap
 from operator import itemgetter
 from pathlib import Path
-from typing import ClassVar, Iterable, Iterator, Optional, Self
+from typing import ClassVar, Iterable, Iterator, Optional, Self, Sequence
 
 from tqdm import tqdm
 
@@ -75,7 +75,8 @@ class Lottery:
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self.result: Extraction = Extraction(draw=set())
         self._iters: int = 1
-        self._numbers: list[int] = list(self.numbers)
+        # self._numbers: list[int] = list(self.numbers)
+        self._numbers: range | list[int] = self.numbers
 
     @cached_property
     def numbers(self) -> range:
@@ -116,7 +117,7 @@ class Lottery:
 
     def choice(self, max_num: int, size: int) -> tuple[int, ...]:
         # don't need to copy self._numbers because of slicing creating a new object
-        numbers = self._numbers[:max_num]
+        numbers = list(self._numbers[:max_num])
         n_items = len(numbers)
 
         def draw():
@@ -135,7 +136,7 @@ class Lottery:
         return numbers if isinstance(numbers, tuple) else (numbers,)
 
     def shuffle(self, max_num: int, size: int) -> list[int]:
-        numbers = self._numbers[:max_num]
+        numbers = list(self._numbers[:max_num])
         rnd.shuffle(numbers)
         start = rnd.randint(0, len(numbers)-size)
         stop = start + size
@@ -186,7 +187,7 @@ class Lottery:
 
             if all((self.xtr_sz, self.max_ext)):
                 self.user_nums = []
-                self._numbers = list(self.numbers)
+                self._numbers = self.numbers
                 extra = self.drawer(self.max_ext, self.xtr_sz)
             else:
                 extra = self.result.extra
@@ -197,6 +198,7 @@ class Lottery:
             raise
         finally:
             self._iters = 0
+            self._numbers = list(self.numbers)
             try:
                 del draw, extra
             except UnboundLocalError:
@@ -210,7 +212,7 @@ class Lottery:
         with self.drawing_session() as results:
             self.result.draw, self.result.extra = results
 
-            return self
+        return self
 
     def __str__(self) -> str:
         now = datetime.now()
@@ -266,7 +268,8 @@ if __name__ == '__main__':
                 print('Concorso Superenalotto selezionato: ')
             case _:
                 config = None
-                print('Nessun concorso valido selezionato, usando configurazione predefinita: ')
+                print(
+                    'Nessun concorso valido selezionato, usando configurazione predefinita: ')
 
         estrazione = Lottery(max_num=args.numbers, draw_sz=args.numsz,
                              max_ext=args.extras, xtr_sz=args.xtrsz,
