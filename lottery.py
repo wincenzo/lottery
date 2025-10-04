@@ -70,7 +70,7 @@ class Lottery:
 
         self.user_nums: list[int] = user_nums or self.CONFIG.user_nums
         self.max_num: int = max_num or self.CONFIG.max_num
-        self.draw_sz: int = (draw_sz or self.CONFIG.draw_sz)
+        self.draw_sz: int = draw_sz or self.CONFIG.draw_sz
         self.max_ext: int = max_ext or self.CONFIG.max_ext
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self.result: Extraction = Extraction(draw=set())
