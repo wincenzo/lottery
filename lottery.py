@@ -8,7 +8,7 @@ from datetime import datetime
 from functools import cached_property
 from itertools import compress, repeat
 from pathlib import Path
-from typing import Iterable, Iterator, Optional, Self
+from typing import Iterable, Iterator, Optional, Self, Sequence
 
 from tqdm import tqdm
 
@@ -73,7 +73,7 @@ class Lottery:
         return range(1, self.max_num + 1)
 
     @validate_draw_params
-    def drawer(self, max_num: int, size: int, numbers: range) -> Iterable[int]:
+    def drawer(self, max_num: int, size: int, numbers: range | list[int]) -> Iterable[int]:
         """
         Adds randomness by simulating multiple draws.
         """
@@ -111,8 +111,8 @@ class Lottery:
 
             if self.user_nums:
                 self.draw_sz = self.draw_sz - len(self.user_nums)
-                numbers = (
-                    filter(lambda n: n not in self.user_nums, self.numbers))
+                numbers = list(
+                    filter(lambda n: n not in self.user_nums, numbers))
 
             draw = set(self.drawer(self.max_num, self.draw_sz, numbers))
             draw.update(self.user_nums)

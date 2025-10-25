@@ -1,7 +1,7 @@
 import random as rnd
 from itertools import repeat, starmap
 from operator import itemgetter
-from typing import ClassVar, Iterable, Iterator, Sequence
+from typing import ClassVar, Iterable, Iterator
 
 from utils import DrawMethod
 
@@ -25,7 +25,7 @@ class Drawer():
     def __init__(self,
                  backend_type: str,
                  user_nums: list[int],
-                 numbers: range | Iterator[int]) -> None:
+                 numbers: range | list[int]) -> None:
         self.backend_type = backend_type
         self.user_nums = user_nums
         self.numbers = numbers
@@ -64,9 +64,13 @@ class Drawer():
         return extraction
 
     def choice(self, max_num: int, size: int) -> tuple[int, ...]:
-        # don't need to .copy() self._numbers because of slicing 
+        # don't need to .copy() self._numbers because of slicing
         # creating a new object
-        pool = list(self.numbers)[:max_num]
+        pool = (
+            list(self.numbers[:max_num])
+            if isinstance(self.numbers, range)
+            else self.numbers[:max_num]
+        )
         n_items = len(pool)
 
         def draw():
@@ -78,11 +82,10 @@ class Drawer():
         return tuple(starmap(draw, repeat((), size)))
 
     def sample(self, max_num: int, size: int) -> tuple[int, ...]:
-        pool = list(self.numbers)[:max_num]
+        pool = self.numbers[:max_num]
         indexes = itemgetter(*rnd.sample(range(len(pool)), k=size))
-        numbers = indexes(pool)
 
-        return numbers if isinstance(numbers, tuple) else (numbers,)
+        return (indexes(pool),) if size == 1 else indexes(pool)
 
     def shuffle(self, max_num: int, size: int) -> list[int]:
         pool = list(self.numbers)[:max_num]
