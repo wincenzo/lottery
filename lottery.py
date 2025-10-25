@@ -6,27 +6,19 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import contextmanager
 from datetime import datetime
 from functools import cached_property
-from itertools import compress, repeat, starmap
-from operator import itemgetter
+from itertools import compress, repeat
 from pathlib import Path
-from typing import ClassVar, Iterable, Iterator, Optional, Self
+from typing import Iterable, Iterator, Optional, Self
 
 from tqdm import tqdm
 
-from utils import Config, DrawMethod, Extraction, validate_draw_params
+from drawers import Drawer
+from utils import Config, Extraction, validate_draw_params
 
 locale.setlocale(locale.LC_ALL, locale='it_IT')
 
 
 class Lottery:
-    BACKENDS: ClassVar[tuple[str, ...]] = (
-        'choice',
-        'randint',
-        'randrange',
-        'sample',
-        'shuffle',
-    )
-
     __slots__ = (
         'CONFIG',
         'init_backend',
@@ -75,86 +67,25 @@ class Lottery:
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self.result: Extraction = Extraction(draw=set())
         self._iters: int = 1
-        self._numbers: range | list[int] = self.numbers
 
     @cached_property
     def numbers(self) -> range:
         return range(1, self.max_num + 1)
 
-    @property
-    def backend(self) -> DrawMethod:
-        return self._backend
-
-    @backend.setter
-    def backend(self, name: str) -> None:
-        self._backend = getattr(self, name, self.random_backend())
-
-    def random_backend(self) -> DrawMethod:
-        return getattr(self, rnd.choice(self.BACKENDS))
-
-    def randint(self, max_num: int, size) -> set[int]:
-        draw = iter(lambda: rnd.randint(1, max_num), None)
-
-        extraction = set(self.user_nums)
-        for number in draw:
-            extraction.add(number)
-            if len(extraction) == size + len(self.user_nums):
-                break
-
-        return extraction
-
-    def randrange(self, max_num: int, size) -> set[int]:
-        def draw() -> Iterator[int]:
-            for _ in repeat(None):
-                yield rnd.randrange(1, max_num+1)
-
-        extraction = {*self.user_nums}
-        while len(extraction) < size + len(self.user_nums):
-            extraction.add(next(draw()))
-
-        return extraction
-
-    def choice(self, max_num: int, size: int) -> tuple[int, ...]:
-        # don't need to .copy() self._numbers because of slicing creating a new object
-        numbers = list(self._numbers[:max_num])
-        n_items = len(numbers)
-
-        def draw():
-            nonlocal n_items
-            number = numbers.pop(rnd.choice(range(n_items)))
-            n_items -= 1
-            return number
-
-        return tuple(starmap(draw, repeat((), size)))
-
-    def sample(self, max_num: int, size: int) -> tuple[int, ...]:
-        numbers = self._numbers[:max_num]
-        indexes = itemgetter(*rnd.sample(range(len(numbers)), k=size))
-        numbers = indexes(numbers)
-
-        return numbers if isinstance(numbers, tuple) else (numbers,)
-
-    def shuffle(self, max_num: int, size: int) -> list[int]:
-        numbers = list(self._numbers[:max_num])
-        rnd.shuffle(numbers)
-        start = rnd.randint(0, len(numbers)-size)
-        stop = start + size
-        grab = slice(start, stop, None)
-
-        return numbers[grab]
-
-    def draw_once(self, max_num: int, size: int) -> Iterable[int]:
-        self.backend = self.init_backend
-        return self.backend(max_num, size)
-
     @validate_draw_params
-    def drawer(self, max_num: int, size: int) -> Iterable[int]:
+    def drawer(self, max_num: int, size: int, numbers: range) -> Iterable[int]:
         """
         Adds randomness by simulating multiple draws.
         """
+        _drawer = Drawer(
+            backend_type=self.init_backend,
+            user_nums=self.user_nums,
+            numbers=numbers,
+        )
+
         with ThreadPoolExecutor() as executor:
             futures = (
-                executor.submit(self.draw_once, max_num, size)
+                executor.submit(_drawer.draw, max_num, size)
                 for _ in tqdm(range(self._iters),
                               desc="Estraendo ...",
                               unit="estrazioni",
@@ -176,18 +107,20 @@ class Lottery:
     @contextmanager
     def drawing_session(self) -> Iterator[tuple[set[int], set[int] | None]]:
         try:
-            if self.user_nums:
-                self._numbers = list(
-                    filter(lambda n: n not in self.user_nums, self.numbers))
-                self.draw_sz = self.draw_sz - len(self.user_nums)
+            numbers = self.numbers
 
-            draw = set(self.drawer(self.max_num, self.draw_sz))
+            if self.user_nums:
+                self.draw_sz = self.draw_sz - len(self.user_nums)
+                numbers = (
+                    filter(lambda n: n not in self.user_nums, self.numbers))
+
+            draw = set(self.drawer(self.max_num, self.draw_sz, numbers))
             draw.update(self.user_nums)
 
             if all((self.xtr_sz, self.max_ext)):
                 self.user_nums = []
-                self._numbers = self.numbers
-                extra = self.drawer(self.max_ext, self.xtr_sz)
+                numbers = self.numbers
+                extra = self.drawer(self.max_ext, self.xtr_sz, numbers)
             else:
                 extra = self.result.extra
 

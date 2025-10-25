@@ -1,6 +1,7 @@
 *
 
 !utils.py
+!drawers.py
 !lottery.py
 !eurojackpot.toml
 !superenalotto.toml
