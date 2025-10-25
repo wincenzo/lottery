@@ -85,7 +85,7 @@ class Lottery:
 
         with ThreadPoolExecutor() as executor:
             futures = (
-                executor.submit(_drawer.draw, max_num, size)
+                executor.submit(_drawer, max_num, size)
                 for _ in tqdm(range(self._iters),
                               desc="Estraendo ...",
                               unit="estrazioni",
@@ -136,7 +136,7 @@ class Lottery:
             except UnboundLocalError:
                 pass
 
-    def __call__(self, backend: str, many: Optional[int] = None) -> Self:
+    def draw(self, backend: str, many: Optional[int] = None) -> Self:
         self.init_backend = backend
         self._iters = many or rnd.randint(
             1, self.CONFIG.max_draw_iters or self._iters)
@@ -212,7 +212,7 @@ if __name__ == '__main__':
         backend = input(
             'Scegli il metodo di estrazione (choice, randint, randrange, sample, shuffle) o premi invio: ').lower()
 
-        print(estrazione(backend=backend, many=args.many))
+        print(estrazione.draw(backend=backend, many=args.many))
 
     except KeyboardInterrupt:
         print('\n--- MANUALLY STOPPED ---')

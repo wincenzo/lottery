@@ -25,7 +25,7 @@ class Drawer():
     def __init__(self,
                  backend_type: str,
                  user_nums: list[int],
-                 numbers: Sequence[int]) -> None:
+                 numbers: range | Iterator[int]) -> None:
         self.backend_type = backend_type
         self.user_nums = user_nums
         self.numbers = numbers
@@ -93,6 +93,6 @@ class Drawer():
 
         return pool[grab]
 
-    def draw(self, max_num: int, size: int) -> Iterable[int]:
+    def __call__(self, max_num: int, size: int) -> Iterable[int]:
         self.backend = self.backend_type
         return self.backend(max_num, size)
