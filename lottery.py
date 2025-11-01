@@ -8,7 +8,7 @@ from datetime import datetime
 from functools import cached_property
 from itertools import compress, repeat
 from pathlib import Path
-from typing import Iterable, Iterator, Optional, Self, Sequence
+from typing import Iterable, Iterator, Optional, Self
 
 from tqdm import tqdm
 
