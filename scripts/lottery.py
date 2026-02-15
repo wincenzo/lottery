@@ -10,9 +10,8 @@ from itertools import compress, repeat
 from pathlib import Path
 from typing import Iterable, Iterator, Optional, Self
 
-from tqdm import tqdm
-
 from drawers import Drawer
+from tqdm import tqdm
 from utils import Config, Extraction, validate_draw_params
 
 locale.setlocale(locale.LC_ALL, locale='it_IT')
@@ -193,10 +192,10 @@ if __name__ == '__main__':
                 config = None
                 print('Nessun concorso selezionato, usando configurazione predefinita: ')
             case c if 'eurojackpot'.startswith(c.lower()):
-                config = Path('eurojackpot.toml')
+                config = Path('config/eurojackpot.toml')
                 print('Concorso Eurojackpot selezionato: ')
             case c if 'superenalotto'.startswith(c.lower()):
-                config = Path('superenalotto.toml')
+                config = Path('config/superenalotto.toml')
                 print('Concorso Superenalotto selezionato: ')
             case _:
                 config = None

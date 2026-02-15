@@ -1,5 +1,7 @@
 *
 
+!scripts/
+!scripts/config/
 !utils.py
 !drawers.py
 !lottery.py

@@ -19,7 +19,7 @@ def validate_draw_params(func) -> Callable:
     return wrapper
 
 
-@dataclass(slots=True)  
+@dataclass(slots=True)
 class Extraction:
     draw: set[int]
     extra: Optional[set[int]] = field(default=None)
@@ -46,10 +46,11 @@ class Config:
             raise ValueError("max_ext cannot be negative")
         if self.max_draw_iters < 1:
             raise ValueError("max_draw_iters must be positive")
-        
+
         for n in self.user_nums:
             if not 0 < n <= self.max_num:
-                raise ValueError(f"User number {n} is out of range (1 to {self.max_num})")
+                raise ValueError(
+                    f"User number {n} is out of range (1 to {self.max_num})")
 
     @classmethod
     def load_config(cls, path: Path | str) -> 'Config':
@@ -61,7 +62,8 @@ class Config:
                     draw_sz=config.get('draw_size', cls.draw_sz),
                     max_ext=config.get('max_extra_numbers', cls.max_ext),
                     xtr_sz=config.get('extra_size', cls.xtr_sz),
-                    max_draw_iters=config.get('max_draw_iters', cls.max_draw_iters),
+                    max_draw_iters=config.get(
+                        'max_draw_iters', cls.max_draw_iters),
                     user_nums=config.get('user_numbers', [])
                 )
         except (FileNotFoundError, tomllib.TOMLDecodeError) as e:
