@@ -2,7 +2,7 @@ import argparse
 import locale
 import random as rnd
 import sys
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime
 from functools import cached_property
@@ -16,6 +16,11 @@ from utils import Config, Extraction, validate_draw_params
 
 
 class Lottery:
+    """
+    Alternative implementation that avoids nested ThreadPoolExecutors.
+    Uses a single ThreadPoolExecutor at the top level for both main and extra draws.
+    This is more efficient and avoids potential issues with nested executors.
+    """
     __slots__ = (
         'CONFIG',
         'init_backend',
@@ -40,18 +45,6 @@ class Lottery:
                  user_nums: Optional[list[int]] = None) -> None:
         """
         Initialize a Lottery instance with configuration and user preferences.
-
-        Parameters:
-            max_num (Optional[int]): The maximum number that can be drawn. If not provided, uses the value from config.
-            draw_sz (Optional[int]): The number of main numbers to draw. If not provided, uses the value from config.
-            max_ext (Optional[int]): The maximum number for extra draws. If not provided, uses the value from config.
-            xtr_sz (Optional[int]): The number of extra numbers to draw. If not provided, uses the value from config.
-            config_path (Optional[Path | str]): Path to a TOML configuration file. If not provided, uses defaults.
-            user_nums (Optional[list[int]]): List of user-chosen numbers to always include in the draw.
-
-        Notes:
-            - If a parameter is not provided, its value is loaded from the configuration file or defaults.
-            - User numbers are excluded from the pool of available numbers for random draws.
         """
 
         self.CONFIG: Config = (
@@ -70,9 +63,10 @@ class Lottery:
         return range(1, self.max_num + 1)
 
     @validate_draw_params
-    def drawer(self, max_num: int, size: int, numbers: range | list[int]) -> Iterable[int]:
+    def _draw_iterations(self, max_num: int, size: int, numbers: range | list[int]) -> Iterable[int]:
         """
-        Adds randomness by simulating multiple draws.
+        Performs multiple draw iterations without ThreadPoolExecutor.
+        This method handles the iteration logic that was previously in drawer().
         """
         _drawer = Drawer(
             backend_type=self.init_backend,
@@ -80,48 +74,61 @@ class Lottery:
             numbers=numbers,
         )
 
-        with ThreadPoolExecutor() as executor:
-            futures = (
-                executor.submit(_drawer, max_num, size)
-                for _ in tqdm(range(self._iters),
-                              desc="Estraendo ...",
-                              unit="estrazioni",
-                              ncols=80,
-                              bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
-            )
+        # Collect all draw results
+        draws = [
+            _drawer(max_num, size) for _ in tqdm(
+                range(self._iters),
+                desc="Estraendo ...",
+                unit="estrazioni",
+                ncols=80,
+                bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
+        ]
 
-            def selections(length: int) -> Iterator[int]:
-                yield from (
-                    1 if rnd.random() > 0.5 else 0 for _ in repeat(None, length))
+        def selections(length: int) -> Iterator[int]:
+            yield from (
+                1 if rnd.random() > 0.5 else 0 for _ in repeat(None, length))
 
-            draws = [f.result() for f in as_completed(futures)]
-
-            while (length := len(draws)) >= 10:
-                draws = list(compress(draws, selections(length)))
-            else:
-                return rnd.choice(draws)
+        while (length := len(draws)) >= 10:
+            draws = list(compress(draws, selections(length)))
+        else:
+            return rnd.choice(draws)
 
     @contextmanager
     def drawing_session(self) -> Iterator[tuple[set[int], set[int] | None]]:
+        """Context manager that performs both main and extra draws concurrently.
+
+        This version uses comprehensions and generator-style constructs where possible.
+        """
         try:
             numbers = self.numbers
 
             if self.user_nums:
                 self.draw_sz -= len(self.user_nums)
                 numbers = list(
-                    filter(lambda n: n not in self.user_nums, numbers))
+                    filter(lambda n: n not in self.user_nums, self.numbers))
 
-            draw = set(self.drawer(self.max_num, self.draw_sz, numbers))
-            draw.update(self.user_nums)
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                futures = [
+                    ('main', executor.submit(self._draw_iterations,
+                                             self.max_num, self.draw_sz, numbers))
+                ]
 
-            if all((self.xtr_sz, self.max_ext)):
-                self.user_nums = []
-                numbers = self.numbers
-                extra = self.drawer(self.max_ext, self.xtr_sz, numbers)
-            else:
-                extra = self.result.extra
+                if all((self.xtr_sz, self.max_ext)):
+                    self.user_nums = []
+                    futures.append(
+                        ('extra', executor.submit(self._draw_iterations,
+                                                  self.max_ext, self.xtr_sz, numbers))
+                    )
+
+                results = {
+                    draw_type: future.result() for draw_type, future in futures
+                }
+
+            draw = set(results['main']) | set(self.user_nums)
+            extra = set(results.get('extra', [])) or self.result.extra
 
             yield draw, extra
+
         except Exception as e:
             print(f'Error: {e}')
             raise
@@ -156,7 +163,7 @@ class Lottery:
 
     def __repr__(self) -> str:
         return (
-            f'Lottery(max_num={self.max_num}, max_ext={self.max_ext},'
+            f'LotteryConcurrentSingleExecutor(max_num={self.max_num}, max_ext={self.max_ext},'
             f' draw_sz={self.draw_sz}, xtr_sz={self.xtr_sz})'
         )
 
@@ -164,7 +171,8 @@ class Lottery:
 if __name__ == '__main__':
     locale.setlocale(locale.LC_ALL, locale='it_IT')
 
-    parser = argparse.ArgumentParser(description='Lottery number generator')
+    parser = argparse.ArgumentParser(
+        description='Lottery number generator (Single Executor Version)')
 
     parser.add_argument('-m', '--many', action='store', default=None, type=int,
                         help='select how many times to draw')

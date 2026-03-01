@@ -1,11 +1,12 @@
 *
 
 !scripts/
-!scripts/config/
 !utils.py
 !drawers.py
-!lottery.py
-!eurojackpot.toml
-!superenalotto.toml
+!lottery_single_executor.py
 !README.md
 !.gitignore
+
+!scripts/config/
+!eurojackpot.toml
+!superenalotto.toml
