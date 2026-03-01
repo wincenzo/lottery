@@ -67,8 +67,7 @@ class Drawer():
         # don't need to .copy() self._numbers because of slicing
         # creating a new object
         pool = (
-            list(self.numbers[:max_num])
-            if isinstance(self.numbers, range)
+            list(self.numbers[:max_num]) if isinstance(self.numbers, range)
             else self.numbers[:max_num]
         )
         n_items = len(pool)

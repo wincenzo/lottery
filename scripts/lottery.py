@@ -14,8 +14,6 @@ from drawers import Drawer
 from tqdm import tqdm
 from utils import Config, Extraction, validate_draw_params
 
-locale.setlocale(locale.LC_ALL, locale='it_IT')
-
 
 class Lottery:
     __slots__ = (
@@ -109,7 +107,7 @@ class Lottery:
             numbers = self.numbers
 
             if self.user_nums:
-                self.draw_sz = self.draw_sz - len(self.user_nums)
+                self.draw_sz -= len(self.user_nums)
                 numbers = list(
                     filter(lambda n: n not in self.user_nums, numbers))
 
@@ -164,6 +162,8 @@ class Lottery:
 
 
 if __name__ == '__main__':
+    locale.setlocale(locale.LC_ALL, locale='it_IT')
+
     parser = argparse.ArgumentParser(description='Lottery number generator')
 
     parser.add_argument('-m', '--many', action='store', default=None, type=int,
