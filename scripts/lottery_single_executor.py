@@ -100,11 +100,12 @@ class Lottery:
         """
         try:
             numbers = self.numbers
+            user_nums = self.user_nums
 
             if self.user_nums:
                 self.draw_sz -= len(self.user_nums)
                 numbers = list(
-                    filter(lambda n: n not in self.user_nums, self.numbers))
+                    filter(lambda n: n not in self.user_nums, numbers))
 
             with ThreadPoolExecutor(max_workers=2) as executor:
                 futures = [
@@ -116,14 +117,14 @@ class Lottery:
                     self.user_nums = []
                     futures.append(
                         ('extra', executor.submit(self._draw_iterations,
-                                                  self.max_ext, self.xtr_sz, numbers))
+                                                  self.max_ext, self.xtr_sz, self.numbers))
                     )
 
                 results = {
                     draw_type: future.result() for draw_type, future in futures
                 }
 
-            draw = set(results['main']) | set(self.user_nums)
+            draw = set(results['main']) | set(user_nums)
             extra = set(results.get('extra', [])) or self.result.extra
 
             yield draw, extra
