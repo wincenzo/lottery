@@ -103,29 +103,21 @@ class Lottery:
             user_nums = self.user_nums
 
             if self.user_nums:
-                self.draw_sz -= len(self.user_nums)
+                self.draw_sz -= len(user_nums)
                 numbers = list(
                     filter(lambda n: n not in self.user_nums, numbers))
 
             with ThreadPoolExecutor(max_workers=2) as executor:
-                futures = [
-                    ('main', executor.submit(self._draw_iterations,
-                                             self.max_num, self.draw_sz, numbers))
-                ]
+                futures_main = executor.submit(
+                    self._draw_iterations,self.max_num, self.draw_sz, numbers)
 
-                if all((self.xtr_sz, self.max_ext)):
+                if extra := all((self.xtr_sz, self.max_ext)):
                     self.user_nums = []
-                    futures.append(
-                        ('extra', executor.submit(self._draw_iterations,
-                                                  self.max_ext, self.xtr_sz, self.numbers))
-                    )
+                    futures_extra = executor.submit(
+                        self._draw_iterations, self.max_ext, self.xtr_sz, self.numbers)
 
-                results = {
-                    draw_type: future.result() for draw_type, future in futures
-                }
-
-            draw = set(results['main']) | set(user_nums)
-            extra = set(results.get('extra', [])) or self.result.extra
+            draw = set(futures_main.result()) | set(user_nums)
+            extra = set(futures_extra.result()) if extra else self.result.extra
 
             yield draw, extra
 
@@ -163,7 +155,7 @@ class Lottery:
 
     def __repr__(self) -> str:
         return (
-            f'LotteryConcurrentSingleExecutor(max_num={self.max_num}, max_ext={self.max_ext},'
+            f'Lottery(max_num={self.max_num}, max_ext={self.max_ext},'
             f' draw_sz={self.draw_sz}, xtr_sz={self.xtr_sz})'
         )
 
@@ -199,10 +191,10 @@ if __name__ == '__main__':
             case '':
                 config = None
                 print('Nessun concorso selezionato, usando configurazione predefinita: ')
-            case c if 'eurojackpot'.startswith(c.lower()):
+            case c if 'eurojackpot'.startswith(c):
                 config = Path('config/eurojackpot.toml')
                 print('Concorso Eurojackpot selezionato: ')
-            case c if 'superenalotto'.startswith(c.lower()):
+            case c if 'superenalotto'.startswith(c):
                 config = Path('config/superenalotto.toml')
                 print('Concorso Superenalotto selezionato: ')
             case _:
