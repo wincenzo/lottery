@@ -95,9 +95,8 @@ class Lottery:
 
     @contextmanager
     def drawing_session(self) -> Iterator[tuple[set[int], set[int] | None]]:
-        """Context manager that performs both main and extra draws concurrently.
-
-        This version uses comprehensions and generator-style constructs where possible.
+        """
+        Context manager that performs both main and extra draws concurrently.
         """
         try:
             numbers = self.numbers
