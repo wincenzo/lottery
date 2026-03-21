@@ -81,7 +81,8 @@ class Lottery:
                 desc="Estraendo ...",
                 unit="estrazioni",
                 ncols=80,
-                bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]')
+                bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]"
+            )
         ]
 
         def selections(length: int) -> Iterator[int]:
@@ -99,24 +100,24 @@ class Lottery:
         Context manager that performs both main and extra draws concurrently.
         """
         try:
-            numbers = self.numbers
-            user_nums = self.user_nums
+            _numbers = self.numbers
+            _user_nums = self.user_nums
 
             if self.user_nums:
-                self.draw_sz -= len(user_nums)
-                numbers = list(
-                    filter(lambda n: n not in self.user_nums, numbers))
+                self.draw_sz -= len(_user_nums)
+                _numbers = list(
+                    filter(lambda n: n not in _user_nums, _numbers))
 
             with ThreadPoolExecutor(max_workers=2) as executor:
                 futures_main = executor.submit(
-                    self._draw_iterations,self.max_num, self.draw_sz, numbers)
+                    self._draw_iterations, self.max_num, self.draw_sz, _numbers)
 
                 if extra := all((self.xtr_sz, self.max_ext)):
-                    self.user_nums = []
+                    self.user_nums.clear()
                     futures_extra = executor.submit(
                         self._draw_iterations, self.max_ext, self.xtr_sz, self.numbers)
 
-            draw = set(futures_main.result()) | set(user_nums)
+            draw = set(futures_main.result()) | set(_user_nums)
             extra = set(futures_extra.result()) if extra else self.result.extra
 
             yield draw, extra
@@ -126,7 +127,7 @@ class Lottery:
             raise
         finally:
             self._iters = 0
-            self._numbers = list(self.numbers)
+            self.user_nums = _user_nums
             try:
                 del draw, extra
             except UnboundLocalError:
