@@ -57,6 +57,7 @@ class Config:
         try:
             with open(path, 'rb') as f:
                 config = tomllib.load(f)
+
                 return cls(
                     max_num=config.get('max_numbers', cls.max_num),
                     draw_sz=config.get('draw_size', cls.draw_sz),
@@ -68,6 +69,7 @@ class Config:
                 )
         except (FileNotFoundError, tomllib.TOMLDecodeError) as e:
             print(f"Config error: {e}, using default configs.")
+
             return cls()
 
 
@@ -78,4 +80,5 @@ class DrawMethod(Protocol):
     """
     __name__: str
 
-    def __call__(self, size: int, max_num: int) -> Iterable[int]: ...
+    def __call__(self, size: int, max_num: int) -> Iterable[int]: 
+        ...
