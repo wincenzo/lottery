@@ -21,20 +21,6 @@ class Lottery:
     Uses a single ThreadPoolExecutor at the top level for both main and extra draws.
     This is more efficient and avoids potential issues with nested executors.
     """
-    __slots__ = (
-        'CONFIG',
-        'init_backend',
-        'max_num',
-        'max_ext',
-        'draw_sz',
-        'xtr_sz',
-        'result',
-        '_iters',
-        '_backend',
-        'user_nums',
-        '_numbers',
-        '__dict__',
-    )
 
     def __init__(self,
                  max_num: Optional[int] = None,
