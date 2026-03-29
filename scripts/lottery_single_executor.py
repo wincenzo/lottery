@@ -49,10 +49,12 @@ class Lottery:
         return range(1, self.max_num + 1)
 
     @validate_draw_params
-    def _draw_iterations(self, max_num: int, size: int, numbers: range | list[int]) -> Iterable[int]:
+    def _draw_iterations(self, 
+                         max_num: int, 
+                         size: int, numbers: range | list[int]) -> Iterable[int]:
         """
-        Performs multiple draw iterations without ThreadPoolExecutor.
-        This method handles the iteration logic that was previously in drawer().
+        Performs multiple draw iterations and collects results, then filters 
+        them down to a single result.
         """
         _drawer = Drawer(
             backend_type=self.init_backend,
