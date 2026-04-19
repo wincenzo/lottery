@@ -111,7 +111,7 @@ class Lottery:
                 draw = set(futures_main.result()) | set(_user_nums)
                 extra = set(futures_extra.result()) if futures_extra is not None else self.result.extra
 
-                yield draw, extra
+            yield draw, extra
 
         except Exception as e:
             print(f'Error: {e}')
