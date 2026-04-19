@@ -88,7 +88,7 @@ class Lottery:
         Context manager that performs both main and extra draws concurrently.
         """
         _numbers = self.numbers
-        _user_nums = self.user_nums
+        _user_nums = list(self.user_nums) # copy to avoid modifying original list
         draw, extra = None, None
 
         try:
@@ -100,15 +100,16 @@ class Lottery:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 futures_main = executor.submit(
                     self._draw_iterations, self.max_num, self.draw_sz, _numbers)
-                
-                draw = set(futures_main.result()) | set(_user_nums)
-                extra = self.result.extra
 
                 if all((self.xtr_sz, self.max_ext)):
                     self.user_nums.clear()
                     futures_extra = executor.submit(
                         self._draw_iterations, self.max_ext, self.xtr_sz, self.numbers)
-                    extra = set(futures_extra.result())
+                else:
+                    futures_extra = None
+
+                draw = set(futures_main.result()) | set(_user_nums)
+                extra = set(futures_extra.result()) if futures_extra is not None else self.result.extra
 
                 yield draw, extra
 
