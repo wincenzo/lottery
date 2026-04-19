@@ -87,10 +87,11 @@ class Lottery:
         """
         Context manager that performs both main and extra draws concurrently.
         """
-        try:
-            _numbers = self.numbers
-            _user_nums = self.user_nums
+        _numbers = self.numbers
+        _user_nums = self.user_nums
+        draw, extra = None, None
 
+        try:
             if self.user_nums:
                 self.draw_sz -= len(_user_nums)
                 _numbers = list(
@@ -99,26 +100,27 @@ class Lottery:
             with ThreadPoolExecutor(max_workers=2) as executor:
                 futures_main = executor.submit(
                     self._draw_iterations, self.max_num, self.draw_sz, _numbers)
+                
+                draw = set(futures_main.result()) | set(_user_nums)
+                extra = self.result.extra
 
-                if extra := all((self.xtr_sz, self.max_ext)):
+                if all((self.xtr_sz, self.max_ext)):
                     self.user_nums.clear()
                     futures_extra = executor.submit(
                         self._draw_iterations, self.max_ext, self.xtr_sz, self.numbers)
+                    extra = set(futures_extra.result())
 
-            draw = set(futures_main.result()) | set(_user_nums)
-            extra = set(futures_extra.result()) if extra else self.result.extra
-
-            yield draw, extra
+                yield draw, extra
 
         except Exception as e:
             print(f'Error: {e}')
             raise
         finally:
-            self._iters = 0
+            self._iters = 1
             self.user_nums = _user_nums
             try:
                 del draw, extra
-            except UnboundLocalError:
+            except NameError:
                 pass
 
     def draw(self, backend: str, many: Optional[int] = None) -> Self:
