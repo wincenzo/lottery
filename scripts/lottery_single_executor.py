@@ -17,7 +17,6 @@ from utils import Config, Extraction, validate_draw_params
 
 class Lottery:
     """
-    Alternative implementation that avoids nested ThreadPoolExecutors.
     Uses a single ThreadPoolExecutor at the top level for both main and extra draws.
     This is more efficient and avoids potential issues with nested executors.
     """
