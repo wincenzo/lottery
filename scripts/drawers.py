@@ -7,6 +7,13 @@ from utils import DrawMethod
 
 
 class Drawer():
+    __slots__ = (
+        'backend_type',
+        'user_nums',
+        'numbers',
+        '_backend',
+    )
+
     BACKENDS: ClassVar[tuple[str, ...]] = (
         'choice',
         'randint',
@@ -15,17 +22,11 @@ class Drawer():
         'shuffle',
     )
 
-    __slots__ = (
-        'backend_type',
-        'user_nums',
-        'numbers',
-        '_backend'
-    )
-
     def __init__(self,
                  backend_type: str,
                  user_nums: list[int],
-                 numbers: range | list[int]) -> None:
+                 numbers: range | list[int]
+                 ) -> None:
         self.backend_type = backend_type
         self.user_nums = user_nums
         self.numbers = numbers

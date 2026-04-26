@@ -42,15 +42,17 @@ class Lottery:
         self.xtr_sz: int = xtr_sz or self.CONFIG.xtr_sz
         self.result: Extraction = Extraction(draw=set())
         self._iters: int = 1
+        self.init_backend: str = 'sample'
 
     @cached_property
     def numbers(self) -> range:
         return range(1, self.max_num + 1)
 
     @validate_draw_params
-    def _draw_iterations(self, 
-                         max_num: int, 
-                         size: int, numbers: range | list[int]) -> Iterable[int]:
+    def _draw_iterations(self,
+                         max_num: int,
+                         size: int,
+                         numbers: range | list[int]) -> Iterable[int]:
         """
         Performs multiple draw iterations and collects results, then filters 
         them down to a single result.
@@ -87,28 +89,27 @@ class Lottery:
         Context manager that performs both main and extra draws concurrently.
         """
         _numbers = self.numbers
-        _user_nums = list(self.user_nums) # copy to avoid modifying original list
         draw, extra = None, None
 
         try:
             if self.user_nums:
-                self.draw_sz -= len(_user_nums)
+                self.draw_sz -= len(self.user_nums)
                 _numbers = list(
-                    filter(lambda n: n not in _user_nums, _numbers))
+                    filter(lambda n: n not in self.user_nums, _numbers))
 
             with ThreadPoolExecutor(max_workers=2) as executor:
                 futures_main = executor.submit(
                     self._draw_iterations, self.max_num, self.draw_sz, _numbers)
 
                 if all((self.xtr_sz, self.max_ext)):
-                    self.user_nums.clear()
                     futures_extra = executor.submit(
                         self._draw_iterations, self.max_ext, self.xtr_sz, self.numbers)
                 else:
                     futures_extra = None
 
-                draw = set(futures_main.result()) | set(_user_nums)
-                extra = set(futures_extra.result()) if futures_extra is not None else self.result.extra
+                draw = set(futures_main.result()) | set(self.user_nums)
+                extra = set(futures_extra.result()
+                            ) if futures_extra is not None else self.result.extra
 
             yield draw, extra
 
@@ -117,7 +118,6 @@ class Lottery:
             raise
         finally:
             self._iters = 1
-            self.user_nums = _user_nums
             try:
                 del draw, extra
             except NameError:
