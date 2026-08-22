@@ -1,8 +1,10 @@
-import tomllib
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from functools import wraps
 from pathlib import Path
-from typing import Callable, Iterable, Optional, Protocol
+from typing import Protocol
+
+import tomllib
 
 
 def validate_draw_params(func) -> Callable:
@@ -22,7 +24,7 @@ def validate_draw_params(func) -> Callable:
 @dataclass(slots=True)
 class Extraction:
     draw: set[int]
-    extra: Optional[set[int]] = field(default=None)
+    extra: set[int] | None = field(default=None)
 
 
 @dataclass(frozen=True)
@@ -80,5 +82,5 @@ class DrawMethod(Protocol):
     """
     __name__: str
 
-    def __call__(self, size: int, max_num: int) -> Iterable[int]: 
+    def __call__(self, size: int, max_num: int) -> Iterable[int]:
         ...

@@ -1,17 +1,18 @@
 import random as rnd
+from collections.abc import Iterable, Iterator
 from itertools import repeat, starmap
 from operator import itemgetter
-from typing import ClassVar, Iterable, Iterator
+from typing import ClassVar
 
 from utils import DrawMethod
 
 
 class Drawer():
     __slots__ = (
-        'backend_type',
-        'user_nums',
-        'numbers',
         '_backend',
+        'backend_type',
+        'numbers',
+        'user_nums',
     )
 
     BACKENDS: ClassVar[tuple[str, ...]] = (

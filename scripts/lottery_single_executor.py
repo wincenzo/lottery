@@ -2,13 +2,15 @@ import argparse
 import locale
 import random as rnd
 import sys
+from collections.abc import Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime
 from functools import cached_property
 from itertools import compress, repeat
 from pathlib import Path
-from typing import Iterable, Iterator, Optional, Self
+from typing import Self
+from zoneinfo import ZoneInfo
 
 from drawers import Drawer
 from tqdm import tqdm
@@ -22,12 +24,12 @@ class Lottery:
     """
 
     def __init__(self,
-                 max_num: Optional[int] = None,
-                 draw_sz: Optional[int] = None,
-                 max_ext: Optional[int] = None,
-                 xtr_sz: Optional[int] = None,
-                 config_path: Optional[Path | str] = None,
-                 user_nums: Optional[list[int]] = None) -> None:
+                 max_num: int | None = None,
+                 draw_sz: int | None = None,
+                 max_ext: int | None = None,
+                 xtr_sz: int | None = None,
+                 config_path: Path | str | None = None,
+                 user_nums: list[int] | None = None) -> None:
         """
         Initialize a Lottery instance with configuration and user preferences.
         """
@@ -80,8 +82,8 @@ class Lottery:
 
         while (length := len(draws)) >= 10:
             draws = list(compress(draws, selections(length)))
-        else:
-            return rnd.choice(draws)
+
+        return rnd.choice(draws)
 
     @contextmanager
     def drawing_session(self) -> Iterator[tuple[set[int], set[int] | None]]:
@@ -123,7 +125,7 @@ class Lottery:
             except NameError:
                 pass
 
-    def draw(self, backend: str, many: Optional[int] = None) -> Self:
+    def draw(self, backend: str, many: int | None = None) -> Self:
         self.init_backend = backend
         self._iters = many or rnd.randint(
             1, self.CONFIG.max_draw_iters or self._iters)
@@ -134,7 +136,7 @@ class Lottery:
         return self
 
     def __str__(self) -> str:
-        now = datetime.now()
+        now = datetime.now(tz=ZoneInfo('Europe/Rome'))
         draw = ' '.join(map(str, sorted(self.result.draw)))
         result = f'\nEstrazione del {now:%x %X}\nNumeri estratti: {draw}'
 
