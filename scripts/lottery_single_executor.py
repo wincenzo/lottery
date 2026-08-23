@@ -2,7 +2,7 @@ import argparse
 import locale
 import random as rnd
 import sys
-from collections.abc import Iterable, Iterator
+from collections.abc import Generator, Iterable, Iterator
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime
@@ -86,7 +86,7 @@ class Lottery:
         return rnd.choice(draws)
 
     @contextmanager
-    def drawing_session(self) -> Iterator[tuple[set[int], set[int] | None]]:
+    def drawing_session(self) -> Generator[tuple[set[int], set[int] | None], None, None]:
         """
         Context manager that performs both main and extra draws concurrently.
         """
