@@ -109,7 +109,8 @@ class Lottery:
                 else:
                     futures_extra = None
 
-                draw = set(futures_main.result()) | set(self.user_nums)
+                draw = set(futures_main.result())
+                draw |= set(self.user_nums)  # Ensure user numbers are included
                 extra = set(futures_extra.result()
                             ) if futures_extra is not None else self.result.extra
 

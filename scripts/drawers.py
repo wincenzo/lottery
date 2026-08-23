@@ -58,10 +58,11 @@ class Drawer():
         def draw() -> Iterator[int]:
             for _ in repeat(None):
                 yield rnd.randrange(1, max_num+1)
-
+                
+        dr = draw()
         extraction = {*self.user_nums}
         while len(extraction) < size + len(self.user_nums):
-            extraction.add(next(draw()))
+            extraction.add(next(dr))
 
         return extraction
 
